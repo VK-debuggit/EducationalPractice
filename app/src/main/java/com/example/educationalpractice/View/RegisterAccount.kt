@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -36,7 +37,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,6 +60,7 @@ fun RegisterAccount() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) } // Состояние видимости пароля
     val context = LocalContext.current
 
     Column(
@@ -162,23 +167,30 @@ fun RegisterAccount() {
             ),
             trailingIcon = {
                 IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .size(17.dp, 13.dp)
+                    onClick = { passwordVisible = !passwordVisible }
                 ) {
                     Icon(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        painter = painterResource(id = R.drawable.eyeclose),
-                        contentDescription = null
+                        painter = painterResource(
+                            id = if (passwordVisible) R.drawable.eyeopen else R.drawable.eyeclose
+                        ),
+                        contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
                     )
                 }
             },
             value = password,
             onValueChange = { password = it },
             shape = RoundedCornerShape(14.dp),
-            visualTransformation = PasswordVisualTransformation(),
-            enabled = !isLoading
+            visualTransformation = if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            enabled = !isLoading,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            )
         )
         Row(
             modifier = Modifier
