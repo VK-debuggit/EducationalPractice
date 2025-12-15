@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">EducationalPractice</string>
     <string name="welcome_mes">Добро пожаловать</string>
     <string name="mes_lets_go">Начнем путешествие</string>
     <string name="dec">Умная, великолепная и модная коллекция Изучите сейчас</string>
@@ -30,4 +31,17 @@
     <string name="newpassword">задать новый пароль</string>
     <string name="SetaNewPassword">установите новый пароль для входа в вашу учетную запись</string>
     <string name="Confirm">подтверждение пароля</string>
+    <string name="Explore">Главная</string>
+    <string name="Looking">Поиск</string>
+    <string name="Select">Категории</string>
+    <string name="Popular">Популярное</string>
+    <string name="See">Все</string>
+    <string name="New">Акции</string>
+    <string name="Favourite">Избранное</string>
+    <string name="CART">Корзина</string>
+    <string name="Items">товара</string>
+    <string name="Subtotal">Сумма</string>
+    <string name="Delivery">Доставка</string>
+
+    <string name="save">Сохранить</string>
 </resources>

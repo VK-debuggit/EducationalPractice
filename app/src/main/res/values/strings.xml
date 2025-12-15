@@ -30,4 +30,17 @@
     <string name="newpassword">Set new password</string>
     <string name="SetaNewPassword">Set a New Password to Login to Your Account</string>
     <string name="Confirm">Confirm password</string>
+    <string name="Explore">Explore</string>
+    <string name="Looking">Looking for shoes</string>
+    <string name="Select">Select Category</string>
+    <string name="Popular">Popular Shoes</string>
+    <string name="See">See all</string>
+    <string name="New">New Arrivals</string>
+    <string name="Favourite">Favourite</string>
+    <string name="CART">CART</string>
+    <string name="Items">Items</string>
+    <string name="Subtotal">Subtotal</string>
+    <string name="Delivery">Delivery</string>
+
+    <string name="save">Save Now</string>
 </resources>
