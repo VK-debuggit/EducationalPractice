@@ -50,7 +50,7 @@ import com.example.educationalpractice.ui.theme.Text
 import com.example.educationalpractice.ui.theme.SubTextDark
 
 @Composable
-fun RegisterAccount() {
+fun SignIn() {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -76,7 +76,7 @@ fun RegisterAccount() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.welcome_mes),
+                text = stringResource(R.string.hello),
                 color = Text,
                 fontSize = 32.sp
             )
@@ -86,24 +86,6 @@ fun RegisterAccount() {
                 fontSize = 16.sp
             )
         }
-        Spacer(Modifier.weight(0.1f))
-        Text(
-            text = stringResource(R.string.Your),
-            color = Text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(Background)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            value = name,
-            placeholder = { Text("xxxxxxxx") },
-            onValueChange = { name = it },
-            enabled = !isLoading
-        )
 
         Spacer(Modifier.weight(0.1f))
 
@@ -159,30 +141,25 @@ fun RegisterAccount() {
             visualTransformation = PasswordVisualTransformation(),
             enabled = !isLoading
         )
+        Spacer(Modifier.weight(0.02f))
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center,
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.agree),
-                contentDescription = "Назад",
-                modifier = Modifier
-                    .size(10.dp, 10.dp)
-            )
-            Spacer(Modifier.width(15.dp))
             Text(
-                text = stringResource(R.string.Agree),
+                text = stringResource(R.string.Recovery),
                 color = SubTextDark,
                 fontSize = 16.sp
             )
         }
+        Spacer(Modifier.weight(0.03f))
         CustomButton(
             onClick = {},
-            text = stringResource(R.string.Sign),
-            enabled = !isLoading
+            text = stringResource(R.string.SignIn),
+            enabled = !isLoading,
+            cornerRadius = 14
         )
         Spacer(Modifier.weight(0.5f))
         Row(
@@ -193,7 +170,7 @@ fun RegisterAccount() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.Already),
+                text = stringResource(R.string.NewUser),
                 color = SubTextDark,
                 fontSize = 16.sp
             )
@@ -204,8 +181,8 @@ fun RegisterAccount() {
 
 @Preview
 @Composable
-private fun RegisterAccountPreview() {
+private fun SignInPreview() {
     EducationalPracticeTheme() {
-        RegisterAccount()
+        SignIn()
     }
 }
