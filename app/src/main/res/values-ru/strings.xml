@@ -20,8 +20,7 @@
     <string name="Already">Есть аккаунт? Войти</string>
     <string name="Recovery">Воcстановить</string>
     <string name="Forgot">Забыл пароль</string>
-    <string name="Enter">Введите свою учетную запись для
-сброса</string>
+    <string name="Enter">Введите свою учетную запись для сброса</string>
     <string name="Send">Отправить</string>
     <string name="Check">Проверьте Ваш Email</string>
     <string name="WeHave">Мы отправили код восстановления пароля на вашу электронную почту.</string>

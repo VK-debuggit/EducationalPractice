@@ -50,7 +50,7 @@ import com.example.educationalpractice.ui.theme.Text
 import com.example.educationalpractice.ui.theme.SubTextDark
 
 @Composable
-fun RegisterAccount() {
+fun ForgotPassword() {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -71,48 +71,27 @@ fun RegisterAccount() {
         )
         Spacer(Modifier.weight(0.1f))
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.welcome_mes),
+                text = stringResource(R.string.Forgot),
                 color = Text,
-                fontSize = 32.sp
+                fontSize = 32.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.data),
+                text = stringResource(R.string.Enter),
                 color = SubTextDark,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
         Spacer(Modifier.weight(0.1f))
-        Text(
-            text = stringResource(R.string.Your),
-            color = Text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(Background)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            value = name,
-            placeholder = { Text("xxxxxxxx") },
-            onValueChange = { name = it },
-            enabled = !isLoading
-        )
-
-        Spacer(Modifier.weight(0.1f))
-
-        Text(
-            text = stringResource(R.string.email),
-            color = Text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -125,88 +104,22 @@ fun RegisterAccount() {
             visualTransformation = PasswordVisualTransformation(),
             enabled = !isLoading
         )
-
         Spacer(Modifier.weight(0.1f))
-
-        Text(
-            text = stringResource(R.string.password),
-            color = Text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(Background)
-                .fillMaxWidth(),
-            trailingIcon = {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .size(17.dp, 13.dp)
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        painter = painterResource(id = R.drawable.eyeclose),
-                        contentDescription = null
-                    )
-                }
-            },
-            value = password,
-            onValueChange = { password = it },
-            shape = RoundedCornerShape(14.dp),
-            visualTransformation = PasswordVisualTransformation(),
-            enabled = !isLoading
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.agree),
-                contentDescription = "Назад",
-                modifier = Modifier
-                    .size(10.dp, 10.dp)
-            )
-            Spacer(Modifier.width(15.dp))
-            Text(
-                text = stringResource(R.string.Agree),
-                color = SubTextDark,
-                fontSize = 16.sp
-            )
-        }
         CustomButton(
             onClick = {},
-            text = stringResource(R.string.Sign),
+            text = stringResource(R.string.Send),
             enabled = !isLoading,
-            disabledContainerColor = Disable
+            cornerRadius = 14
         )
-        Spacer(Modifier.weight(0.5f))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.Already),
-                color = SubTextDark,
-                fontSize = 16.sp
-            )
-        }
+        Spacer(Modifier.weight(0.8f))
     }
 
 }
 
 @Preview
 @Composable
-private fun RegisterAccountPreview() {
+private fun ForgotPasswordPreview() {
     EducationalPracticeTheme() {
-        RegisterAccount()
+        ForgotPassword()
     }
 }

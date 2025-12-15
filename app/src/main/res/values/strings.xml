@@ -20,8 +20,7 @@
     <string name="Already">Already Have Account? Log In</string>
     <string name="Recovery">Recovery Password</string>
     <string name="Forgot">Forgot Password</string>
-    <string name="Enter">Enter your Email account to reset
-your password</string>
+    <string name="Enter">Enter your Email account to reset your password</string>
     <string name="Send">Send</string>
     <string name="Check">Check your email</string>
     <string name="WeHave">We have send password recovery code in your email</string>
