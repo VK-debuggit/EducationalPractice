@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_mes">Добро пожаловать</string>
+    <string name="mes_lets_go">Начнем путешествие</string>
+    <string name="dec">Умная, великолепная и модная коллекция Изучите сейчас</string>
+    <string name="we_have_power">У вас есть сила, чтобы</string>
+    <string name="flowers">В вашей комнате много красивых и привлекательных растений</string>
+    <string name="hello">Привет!</string>
+    <string name="data">Заполните Свои данные</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="start">Начать</string>
+    <string name="next">Далее</string>
+    <string name="Register">Регистрация</string>
+    <string name="Your">Ваше имя</string>
+    <string name="Agree">Даю согласие на обработку персональных данных</string>
+    <string name="Sign">Зарегистрироваться</string>
+    <string name="SignIn">Войти</string>
+    <string name="NewUser">Вы впервые? Создать пользователя</string>
+    <string name="Already">Есть аккаунт? Войти</string>
+    <string name="Recovery">Воcстановить</string>
+    <string name="Forgot">Забыл пароль</string>
+    <string name="Enter">Введите свою учетную запись для
+сброса</string>
+    <string name="Send">Отправить</string>
+    <string name="Check">Проверьте Ваш Email</string>
+    <string name="WeHave">Мы отправили код восстановления пароля на вашу электронную почту.</string>
+    <string name="OTP">OTP проверка</string>
+    <string name="Please">Пожалуйста, проверьте свою электронную почту, чтобы увидеть код подтверждения</string>
+    <string name="OTPCode">OTP Код</string>
+    <string name="newpassword">задать новый пароль</string>
+    <string name="SetaNewPassword">установите новый пароль для входа в вашу учетную запись</string>
+    <string name="Confirm">подтверждение пароля</string>
+</resources>

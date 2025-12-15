@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">EducationalPractice</string>
+    <string name="welcome_mes">Welcome</string>
+    <string name="mes_lets_go">Let’s Start Journey </string>
+    <string name="dec">Smart, Gorgeous &amp; Fashionable Collection Explor Now</string>
+    <string name="we_have_power">You Have the Power To</string>
+    <string name="flowers">There Are Many Beautiful And Attractive Plants To Your Room</string>
+    <string name="hello">Hello Again!</string>
+    <string name="data">Fill your details</string>
+    <string name="email">Email Address</string>
+    <string name="password">Password</string>
+    <string name="start">Start</string>
+    <string name="next">next</string>
+    <string name="Register">Register Account</string>
+    <string name="Your">Your Name</string>
+    <string name="Agree">I agree to the processing of personal data</string>
+    <string name="Sign">Sign up</string>
+    <string name="SignIn">Sign In</string>
+    <string name="NewUser">New User? Create Account</string>
+    <string name="Already">Already Have Account? Log In</string>
+    <string name="Recovery">Recovery Password</string>
+    <string name="Forgot">Forgot Password</string>
+    <string name="Enter">Enter your Email account to reset
+your password</string>
+    <string name="Send">Send</string>
+    <string name="Check">Check your email</string>
+    <string name="WeHave">We have send password recovery code in your email</string>
+    <string name="OTP">OTP Verification</string>
+    <string name="Please">Please check your email to see the verification code</string>
+    <string name="OTPCode">OTP Code</string>
+    <string name="newpassword">Set new password</string>
+    <string name="SetaNewPassword">Set a New Password to Login to Your Account</string>
+    <string name="Confirm">Confirm password</string>
 </resources>
