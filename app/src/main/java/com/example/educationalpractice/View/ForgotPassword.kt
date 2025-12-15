@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,9 +100,15 @@ fun ForgotPassword() {
                 .fillMaxWidth(),
             value = email,
             onValueChange = { email = it },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Background,
+                unfocusedContainerColor = Background,
+                disabledContainerColor = Background,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
-            visualTransformation = PasswordVisualTransformation(),
             enabled = !isLoading
         )
         Spacer(Modifier.weight(0.1f))
