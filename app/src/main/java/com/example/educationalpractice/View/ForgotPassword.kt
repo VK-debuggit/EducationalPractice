@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.sp
 import com.example.educationalpractice.Data.CustomButton
 import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
 import com.example.educationalpractice.R
+import com.example.educationalpractice.navigation.NavigationManager
+import com.example.educationalpractice.navigation.Views
 import com.example.educationalpractice.ui.theme.Accent
 import com.example.educationalpractice.ui.theme.Background
 import com.example.educationalpractice.ui.theme.Disable
@@ -69,6 +71,12 @@ fun ForgotPassword() {
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
             modifier = Modifier
+                .clickable(
+                    enabled = !isLoading,
+                    onClick = {
+                        NavigationManager.navigateTo(Views.SignIn.route)
+                    }
+                )
         )
         Spacer(Modifier.weight(0.1f))
         Column(

@@ -2,8 +2,9 @@ package com.example.educationalpractice.View
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,53 +16,65 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.educationalpractice.Data.CustomButton
-import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import com.example.educationalpractice.Data.CustomAlertDialog
 import com.example.educationalpractice.R
-import com.example.educationalpractice.ui.theme.Accent
-import com.example.educationalpractice.ui.theme.Background
-import com.example.educationalpractice.ui.theme.Disable
-import com.example.educationalpractice.ui.theme.Text
-import com.example.educationalpractice.ui.theme.SubTextDark
+import com.example.educationalpractice.navigation.NavigationManager
+import com.example.educationalpractice.navigation.Views
+import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.ui.theme.ViewModel.SignUpViewModel
 
 @Composable
 fun RegisterAccount() {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var passwordVisible by remember { mutableStateOf(false) } // Состояние видимости пароля
+    var isAgreed by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var showEmailErrorDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val viewModel: SignUpViewModel = viewModel()
+
+    val isLoading = viewModel.isLoading
+
+    // Функция валидации email
+    fun validateEmail(email: String): Boolean {
+        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{3,}\$".toRegex()
+        return pattern.matches(email)
+    }
 
     Column(
         modifier = Modifier
@@ -70,12 +83,19 @@ fun RegisterAccount() {
             .fillMaxSize()
     ) {
         Spacer(Modifier.weight(0.1f))
+
+        // Иконка назад
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
             modifier = Modifier
+                .clickable {
+                    NavigationManager.navigateBack()
+                }
         )
+
         Spacer(Modifier.weight(0.1f))
+
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -84,21 +104,29 @@ fun RegisterAccount() {
             Text(
                 text = stringResource(R.string.welcome_mes),
                 color = Text,
-                fontSize = 32.sp
+                fontSize = 32.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
             Text(
                 text = stringResource(R.string.data),
                 color = SubTextDark,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
+
         Spacer(Modifier.weight(0.1f))
+
+        // Поле для имени
         Text(
             text = stringResource(R.string.Your),
             color = Text,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -120,12 +148,14 @@ fun RegisterAccount() {
 
         Spacer(Modifier.weight(0.1f))
 
+        // Поле для email
         Text(
             text = stringResource(R.string.email),
             color = Text,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -142,17 +172,24 @@ fun RegisterAccount() {
             onValueChange = { email = it },
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
-            enabled = !isLoading
+            enabled = !isLoading,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            )
         )
 
         Spacer(Modifier.weight(0.1f))
 
+        // Поле для пароля
         Text(
             text = stringResource(R.string.password),
             color = Text,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -192,48 +229,156 @@ fun RegisterAccount() {
                 imeAction = ImeAction.Done
             )
         )
+
+        Spacer(Modifier.weight(0.05f))
+
+        // Чекбокс согласия
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center,
+                .clickable { isAgreed = !isAgreed },
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.agree),
-                contentDescription = "Назад",
+            Box(
                 modifier = Modifier
-                    .size(10.dp, 10.dp)
-            )
+                    .size(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(
+                        if (isAgreed) Accent else Color.Transparent,
+                        RoundedCornerShape(4.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isAgreed) Accent else Color.Gray,
+                        shape = RoundedCornerShape(4.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.agree),
+                    contentDescription = "Согласен",
+                    modifier = Modifier.size(10.dp, 10.dp),
+                    colorFilter = ColorFilter.tint(
+                        if (isAgreed) Color.White else Color.Gray
+                    )
+                )
+            }
+
             Spacer(Modifier.width(15.dp))
+
             Text(
                 text = stringResource(R.string.Agree),
                 color = SubTextDark,
-                fontSize = 16.sp
+                style = TextStyle(
+                    textDecoration = TextDecoration.Underline
+                ),
+                fontSize = 16.sp,
+                modifier = Modifier.clickable { isAgreed = !isAgreed }
             )
         }
-        CustomButton(
-            onClick = {},
-            text = stringResource(R.string.Sign),
-            enabled = !isLoading,
-            disabledContainerColor = Disable
-        )
-        Spacer(Modifier.weight(0.5f))
-        Row(
+
+        Spacer(Modifier.height(24.dp))
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .height(50.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(
+                    if (isAgreed && !isLoading) Accent else Disable
+                )
+                .clickable(
+                    enabled = isAgreed && !isLoading,
+                    onClick = {
+                        if (!isAgreed) {
+                            Toast.makeText(context, "Примите условия соглашения", Toast.LENGTH_SHORT).show()
+                            return@clickable
+                        }
+
+                        if (email.isBlank() || password.isBlank() || name.isBlank()) {
+                            Toast.makeText(context, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                            return@clickable
+                        }
+
+                        if (!validateEmail(email)) {
+                            showEmailErrorDialog = true
+                            return@clickable
+                        }
+
+                        if (password.length < 6) {
+                            Toast.makeText(context, "Пароль должен быть минимум 6 символов", Toast.LENGTH_SHORT).show()
+                            return@clickable
+                        }
+
+                        // Вызов регистрации через ViewModel
+                        viewModel.signUp(
+                            email = email,
+                            password = password,
+                            context = context,
+                            onSuccess = { savedEmail ->
+                                NavigationManager.navigateTo(Views.Verification.route)
+                            },
+                            onError = { error ->
+                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.Sign),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+        Spacer(Modifier.weight(0.5f))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.Already),
-                color = SubTextDark,
+                color = Hint,
                 fontSize = 16.sp
             )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = stringResource(R.string.Invite),
+                color = Text,
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .clickable(
+                        enabled = !isLoading,
+                        onClick = {
+                            NavigationManager.navigateTo(Views.SignIn.route)
+                        }
+                    )
+            )
         }
+        Spacer(Modifier.weight(0.1f))
     }
 
+    if (showEmailErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showEmailErrorDialog = false },
+            dialogTitle = "Некорректный email",
+            dialogText = "Email должен быть в формате: name@domenname.ru\n" +
+                    "• Только маленькие буквы и цифры\n" +
+                    "• Старший домен минимум 3 символа"
+        )
+    }
 }
 
 @Preview

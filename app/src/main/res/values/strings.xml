@@ -16,8 +16,10 @@
     <string name="Agree">I agree to the processing of personal data</string>
     <string name="Sign">Sign up</string>
     <string name="SignIn">Sign In</string>
-    <string name="NewUser">New User? Create Account</string>
-    <string name="Already">Already Have Account? Log In</string>
+    <string name="NewUser">New User? </string>
+    <string name="Create">Create Account</string>
+    <string name="Already">Already Have Account? </string>
+    <string name="Invite">Log In</string>
     <string name="Recovery">Recovery Password</string>
     <string name="Forgot">Forgot Password</string>
     <string name="Enter">Enter your Email account to reset your password</string>

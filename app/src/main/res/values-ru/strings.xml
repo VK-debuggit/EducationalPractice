@@ -17,8 +17,10 @@
     <string name="Agree">Даю согласие на обработку персональных данных</string>
     <string name="Sign">Зарегистрироваться</string>
     <string name="SignIn">Войти</string>
-    <string name="NewUser">Вы впервые? Создать пользователя</string>
-    <string name="Already">Есть аккаунт? Войти</string>
+    <string name="NewUser">Вы впервые? </string>
+    <string name="Create">Создать пользователя</string>
+    <string name="Already">Есть аккаунт? </string>
+    <string name="Invite">Войти</string>
     <string name="Recovery">Воcстановить</string>
     <string name="Forgot">Забыл пароль</string>
     <string name="Enter">Введите свою учетную запись для сброса</string>
