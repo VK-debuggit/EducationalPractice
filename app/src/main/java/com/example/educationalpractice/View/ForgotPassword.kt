@@ -3,62 +3,51 @@ package com.example.educationalpractice.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.educationalpractice.Data.CustomAlertDialog
 import com.example.educationalpractice.Data.CustomButton
-import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
-import com.example.educationalpractice.ui.theme.Accent
-import com.example.educationalpractice.ui.theme.Background
-import com.example.educationalpractice.ui.theme.Disable
-import com.example.educationalpractice.ui.theme.Text
-import com.example.educationalpractice.ui.theme.SubTextDark
+import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.ui.theme.ViewModel.ForgotPasswordViewModel
 
 @Composable
 fun ForgotPassword() {
-    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     val context = LocalContext.current
+    val viewModel: ForgotPasswordViewModel = viewModel()
+
+    fun isValidEmail(email: String): Boolean {
+        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{2,}\$".toRegex()
+        return pattern.matches(email)
+    }
+
+    fun showError(message: String) {
+        errorMessage = message
+        showErrorDialog = true
+    }
 
     Column(
         modifier = Modifier
@@ -67,40 +56,50 @@ fun ForgotPassword() {
             .fillMaxSize()
     ) {
         Spacer(Modifier.weight(0.1f))
+
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
-            modifier = Modifier
-                .clickable(
-                    enabled = !isLoading,
-                    onClick = {
-                        NavigationManager.navigateTo(Views.SignIn.route)
-                    }
-                )
+            modifier = Modifier.clickable {
+                NavigationManager.navigateTo(Views.SignIn.route)
+            }
         )
+
         Spacer(Modifier.weight(0.1f))
+
         Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(R.string.Forgot),
                 color = Text,
                 fontSize = 32.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
             )
+
             Spacer(Modifier.height(8.dp))
+
             Text(
                 text = stringResource(R.string.Enter),
                 color = SubTextDark,
                 fontSize = 16.sp,
-                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
         }
+
         Spacer(Modifier.weight(0.1f))
+
+        Text(
+            text = "Email",
+            color = Text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(Modifier.height(8.dp))
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -117,24 +116,101 @@ fun ForgotPassword() {
             ),
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
-            enabled = !isLoading
+            singleLine = true,
+            isError = email.isNotEmpty() && !isValidEmail(email)
         )
+
         Spacer(Modifier.weight(0.1f))
+
         CustomButton(
-            onClick = {},
-            text = stringResource(R.string.Send),
-            enabled = !isLoading,
-            cornerRadius = 14
+            onClick = {
+                if (email.isBlank()) {
+                    showError("Пожалуйста, введите email")
+                } else if (!isValidEmail(email)) {
+                    showError("Введите корректный email в формате: name@domenname.ru")
+                } else {
+                    viewModel.sendPasswordResetEmail(
+                        email = email,
+                        onSuccess = {
+                            showSuccessDialog = true
+                        },
+                        onError = { error ->
+                            showError(error)
+                        }
+                    )
+                }
+            },
+            text = if (viewModel.isLoading) "Отправка..." else stringResource(R.string.Send),
+            enabled = !viewModel.isLoading
         )
+
         Spacer(Modifier.weight(0.8f))
     }
 
-}
+    if (showSuccessDialog) {
+        Dialog(
+            onDismissRequest = {
+                showSuccessDialog = false
+                NavigationManager.navigateTo(Views.Verification.route)
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clickable {
+                        showSuccessDialog = false
+                        NavigationManager.navigateTo(Views.Verification.route)
+                    },
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.emailotp),
+                        contentDescription = "Успех",
+                        modifier = Modifier.size(64.dp)
+                    )
 
-@Preview
-@Composable
-private fun ForgotPasswordPreview() {
-    EducationalPracticeTheme() {
-        ForgotPassword()
+                    Spacer(Modifier.height(24.dp))
+
+                    Text(
+                        text = stringResource(R.string.Check),
+                        color = Text,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.WeHave),
+                        color = SubTextDark,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 24.sp
+                    )
+                }
+            }
+        }
+    }
+
+    if (showErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            dialogTitle = "Ошибка",
+            dialogText = errorMessage,
+            iconResId = null,
+            onConfirmButtonClick = { showErrorDialog = false }
+        )
     }
 }

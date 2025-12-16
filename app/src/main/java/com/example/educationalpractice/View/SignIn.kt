@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.educationalpractice.Data.CustomAlertDialog
 import com.example.educationalpractice.Data.CustomButton
 import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
 import com.example.educationalpractice.R
@@ -64,7 +65,25 @@ fun SignIn() {
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var showEmailErrorDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    // Функция валидации email по паттерну "name@domenname.ru"
+    fun isValidEmail(email: String): Boolean {
+        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{2,}\$".toRegex()
+        return pattern.matches(email)
+    }
+
+    if (showEmailErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showEmailErrorDialog = false },
+            dialogTitle = "Некорректный email",
+            dialogText = "Email должен быть в формате: name@domenname.ru\n\n" +
+                    "• name - только маленькие буквы и цифры\n" +
+                    "• domenname - только маленькие буквы и цифры\n" +
+                    "• ru - только буквы (минимум 2 символа)\n\n"
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -120,7 +139,12 @@ fun SignIn() {
             ),
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
-            enabled = !isLoading
+            enabled = !isLoading,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            )
         )
 
         Spacer(Modifier.weight(0.1f))

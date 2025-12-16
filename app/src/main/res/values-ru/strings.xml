@@ -44,6 +44,11 @@
     <string name="Items">товара</string>
     <string name="Subtotal">Сумма</string>
     <string name="Delivery">Доставка</string>
-
+    <string name="Total">Итого</string>
+    <string name="Checkout">Оформить заказ</string>
+    <string name="Contact">Контактная информация</string>
+    <string name="Address">Адрес</string>
+    <string name="phone">телефон</string>
+    <string name="Payment">Способ оплаты</string>
     <string name="save">Сохранить</string>
 </resources>

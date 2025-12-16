@@ -57,6 +57,7 @@ fun RegisterAccount() {
     var password by remember { mutableStateOf("") }
     var isAgreed by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var showEmailErrorDialog by remember { mutableStateOf(false) }
 
     // Единое состояние для отображения ошибок
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -78,6 +79,23 @@ fun RegisterAccount() {
     // Функция для показа ошибок валидации
     fun showValidationError(message: String) {
         showError("Ошибка заполнения", listOf(message))
+    }
+
+    // Функция валидации email по паттерну "name@domenname.ru"
+    fun isValidEmail(email: String): Boolean {
+        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{2,}\$".toRegex()
+        return pattern.matches(email)
+    }
+
+    if (showEmailErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showEmailErrorDialog = false },
+            dialogTitle = "Некорректный email",
+            dialogText = "Email должен быть в формате: name@domenname.ru\n\n" +
+                    "• name - только маленькие буквы и цифры\n" +
+                    "• domenname - только маленькие буквы и цифры\n" +
+                    "• ru - только буквы (минимум 2 символа)\n\n"
+        )
     }
 
     val context = LocalContext.current
@@ -172,6 +190,7 @@ fun RegisterAccount() {
                 .background(Background)
                 .fillMaxWidth(),
             value = email,
+            onValueChange = { email = it },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Background,
                 unfocusedContainerColor = Background,
@@ -179,7 +198,6 @@ fun RegisterAccount() {
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
             ),
-            onValueChange = { email = it },
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
             enabled = !isLoading,

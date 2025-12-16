@@ -43,6 +43,11 @@
     <string name="Items">Items</string>
     <string name="Subtotal">Subtotal</string>
     <string name="Delivery">Delivery</string>
-
+    <string name="Total">Total</string>
+    <string name="Checkout">Checkout</string>
+    <string name="Contact">Contact Information</string>
+    <string name="Address">Address</string>
+    <string name="phone">phone number</string>
+    <string name="Payment">Payment Method</string>
     <string name="save">Save Now</string>
 </resources>
