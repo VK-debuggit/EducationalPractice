@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-//class SignUpViewModel(private val database: AppDatabase) : ViewModel() {
 class SignUpViewModel : ViewModel() {
     var isLoading = false
     var errorMessage = ""
@@ -37,35 +36,7 @@ class SignUpViewModel : ViewModel() {
     var pendingPassword = ""
     private var savedEmail = ""
 
-//    fun signUp(email: String, password: String, context: Context, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
-//        isLoading = true
-//        viewModelScope.launch {
-//            try {
-//                val response = RetrofitInstance.userManagementService.signUp(
-//                    SignUpRequest(
-//                        email,
-//                        password
-//                    )
-//                )
-//
-//                if (response.isSuccessful) {
-//                    // Сохраняем email в SharedPreferences и в переменную
-//                    saveEmailToPrefs(email, context)
-//                    savedEmail = email
-//                    isLoading = false
-//                    onSuccess(email)
-//                } else {
-//                    isLoading = false
-//                    onError("Ошибка регистрации")
-//                }
-//            } catch (e: Exception) {
-//                isLoading = false
-//                onError("Ошибка сети: ${e.message}")
-//            }
-//        }
-//    }
-
-    // Регистрация без подтверждения
+    // Регистрация
     fun signUp(
         email: String,
         password: String,
@@ -118,15 +89,14 @@ class SignUpViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     isLoading = false
-                    onSuccess() // Успешный вход после регистрации
+                    onSuccess()
                 } else {
                     isLoading = false
-                    // Если вход не удался, все равно считаем регистрацию успешной
-                    onSuccess() // Переходим на экран Sign In
+                    onSuccess()
                 }
             } catch (e: Exception) {
                 isLoading = false
-                onSuccess() // В любом случае переходим к входу
+                onSuccess()
             }
         }
     }
@@ -135,7 +105,6 @@ class SignUpViewModel : ViewModel() {
         isLoading = true
         viewModelScope.launch {
             try {
-                // Используем сохраненный email
                 val email = savedEmail.ifEmpty { getEmailFromPrefs(context) }
 
                 if (email.isEmpty()) {
@@ -171,7 +140,7 @@ class SignUpViewModel : ViewModel() {
         return prefs.getString("pending_email", "") ?: ""
     }
 
-    // Метод для получения email (для отображения)
+    // Метод для получения email
     fun getEmail(): String {
         return savedEmail
     }

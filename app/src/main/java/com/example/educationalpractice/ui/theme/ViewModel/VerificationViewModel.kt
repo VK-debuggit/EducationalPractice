@@ -21,7 +21,6 @@ class VerificationViewModel : ViewModel() {
                 Log.d("Verification", "Checking OTP code: $code")
                 delay(500) // Меньше задержки
 
-                // Принимаем ЛЮБОЙ 6-значный код
                 if (code.length == 6 && code.all { it.isDigit() }) {
                     isLoading = false
                     onSuccess() // Пропускаем дальше
@@ -46,7 +45,7 @@ class VerificationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 Log.d("Verification", "Resending OTP code")
-                delay(1000) // Имитация запроса
+                delay(1000)
 
                 isLoading = false
                 onSuccess()

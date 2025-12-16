@@ -21,8 +21,6 @@ class ResetPasswordViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 Log.d("ResetPassword", "Обновление пароля")
-
-                // Вызов Supabase API для обновления пароля
                 val response = RetrofitInstance.userManagementService.updateUser(
                     UpdatePasswordRequest(password = newPassword)
                 )

@@ -110,7 +110,6 @@ fun RegisterAccount() {
     ) {
         Spacer(Modifier.weight(0.1f))
 
-        // Иконка назад - переход на SignIn
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
@@ -176,7 +175,6 @@ fun RegisterAccount() {
 
         Spacer(Modifier.weight(0.1f))
 
-        // Поле для email
         Text(
             text = stringResource(R.string.email),
             color = Text,
@@ -210,7 +208,6 @@ fun RegisterAccount() {
 
         Spacer(Modifier.weight(0.1f))
 
-        // Поле для пароля
         Text(
             text = stringResource(R.string.password),
             color = Text,
@@ -260,7 +257,6 @@ fun RegisterAccount() {
 
         Spacer(Modifier.weight(0.05f))
 
-        // Чекбокс согласия
         Row(
             modifier = Modifier
                 .fillMaxWidth()

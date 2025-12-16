@@ -19,6 +19,7 @@ import com.example.educationalpractice.ui.theme.Accent
 import com.example.educationalpractice.ui.theme.Block
 import com.example.educationalpractice.ui.theme.SubTextDark
 
+//Компонент: диалоговое окно
 @Composable
 fun CustomAlertDialog(
     onDismissRequest: () -> Unit,

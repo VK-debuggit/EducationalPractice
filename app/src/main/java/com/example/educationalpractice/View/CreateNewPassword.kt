@@ -93,7 +93,6 @@ fun CreateNewPassword() {
     ) {
         Spacer(Modifier.weight(0.1f))
 
-        // Иконка назад
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
@@ -178,7 +177,6 @@ fun CreateNewPassword() {
 
         Spacer(Modifier.weight(0.05f))
 
-        // Поле для подтверждения пароля
         Text(
             text = "Подтвердите пароль",
             color = Text,

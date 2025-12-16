@@ -14,6 +14,7 @@ import com.example.educationalpractice.ui.theme.Accent
 import com.example.educationalpractice.ui.theme.Background
 import com.example.educationalpractice.ui.theme.Disable
 
+//Компонент: кнопка
 @Composable
 fun CustomButton(
     onClick: () -> Unit,

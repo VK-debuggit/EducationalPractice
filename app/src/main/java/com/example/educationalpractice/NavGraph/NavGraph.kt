@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.educationalpractice.View.*
 
-// Объект для доступа к NavController из любого места
+//Навигация
 object NavigationManager {
     private var navController: NavHostController? = null
 
