@@ -73,6 +73,8 @@ fun Verification() {
             return
         }
 
+        isTimerActive = false
+
         viewModel.verifyOtpCode(
             code = otpCode,
             onSuccess = {
@@ -88,6 +90,7 @@ fun Verification() {
 
     fun resendOtpCode() {
         if (canResend) {
+            isTimerActive = false
             viewModel.resendOtpCode(
                 onSuccess = {
                     timeRemaining = 60
@@ -99,6 +102,7 @@ fun Verification() {
                 onError = { error ->
                     errorMessage = error
                     showErrorDialog = true
+                    isTimerActive = true
                 }
             )
         }

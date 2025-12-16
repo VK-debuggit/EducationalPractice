@@ -49,5 +49,26 @@
     <string name="Address">Address</string>
     <string name="phone">phone number</string>
     <string name="Payment">Payment Method</string>
+    <string name="min">min ago</string>
+    <string name="OPEN">OPEN</string>
+    <string name="ViewMap">View Map</string>
+    <string name="Recent">Recent</string>
+    <string name="Yesterday">Yesterday</string>
+    <string name="more">more details</string>
+    <string name="added">added to cart</string>
+    <string name="Add">Add to Cart</string>
+    <string name="YourPayment">Your Payment Is Successful</string>
+    <string name="Back">Back To Shopping</string>
+    <string name="Orders">Orders</string>
+    <string name="Notifications">Notifications</string>
+    <string name="SETTINGS">SETTINGS</string>
+    <string name="SignOut">Sign Out</string>
+    <string name="Profile">Profile</string>
+    <string name="Change">Change Profile Picture</string>
+    <string name="YourName">Your Name</string>
+    <string name="LastName">Last Name</string>
+    <string name="confirm">confirm</string>
+    <string name="Map">Map</string>
+    <string name="LoyaltyCard">Loyalty Card</string>
     <string name="save">Save Now</string>
 </resources>

@@ -50,5 +50,26 @@
     <string name="Address">Адрес</string>
     <string name="phone">телефон</string>
     <string name="Payment">Способ оплаты</string>
+    <string name="min">мин назад</string>
+    <string name="OPEN">Открыть</string>
+    <string name="ViewMap">Посмотреть на карте</string>
+    <string name="Recent">Недавний</string>
+    <string name="Yesterday">Вчера</string>
+    <string name="more">Подробнее</string>
+    <string name="added">Добавлено</string>
+    <string name="Add">В корзину</string>
+    <string name="YourPayment">Вы успешно оформили заказ</string>
+    <string name="Back">Вернуться к покупкам</string>
+    <string name="Orders">Заказы</string>
+    <string name="Notifications">Уведомления</string>
+    <string name="SETTINGS">Настройки</string>
+    <string name="SignOut">Выйти</string>
+    <string name="Profile">профиль</string>
+    <string name="Change">Изменить фото профиля</string>
+    <string name="YourName">Имя</string>
+    <string name="LastName">Фамилия</string>
+    <string name="confirm">подтвердить</string>
+    <string name="Map">карта</string>
+    <string name="LoyaltyCard">карта лояльности</string>
     <string name="save">Сохранить</string>
 </resources>
