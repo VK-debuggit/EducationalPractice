@@ -10,6 +10,9 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import com.example.educationalpractice.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -33,10 +36,14 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+val Raleway = FontFamily(
+    Font(R.font.raleway)
+//    Font(R.font.raleway_bold)
+)
+
 @Composable
 fun EducationalPracticeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

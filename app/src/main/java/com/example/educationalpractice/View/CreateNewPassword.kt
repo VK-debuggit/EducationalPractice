@@ -1,6 +1,5 @@
 package com.example.educationalpractice.View
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,6 +37,7 @@ fun CreateNewPassword() {
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
@@ -96,9 +95,15 @@ fun CreateNewPassword() {
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
-            modifier = Modifier.clickable {
-                NavigationManager.navigateTo(Views.Verification.route)
-            }
+            modifier = Modifier
+                .clickable(
+                    enabled = !isLoading,
+                    onClick = {
+                        NavigationManager.navigateBack()
+                    }
+                )
+                .size(24.dp)
+                .padding(start = 4.dp)
         )
 
         Spacer(Modifier.weight(0.1f))
@@ -246,7 +251,6 @@ fun CreateNewPassword() {
             dialogTitle = "Успешно",
             dialogText = "Пароль успешно обновлен",
             iconResId = R.drawable.emailotp,
-            confirmButtonText = "OK",
             onConfirmButtonClick = {
                 showSuccessDialog = false
                 NavigationManager.navigateTo(Views.SignIn.route)
@@ -261,7 +265,6 @@ fun CreateNewPassword() {
             dialogTitle = "Ошибка",
             dialogText = errorMessage,
             iconResId = null,
-            confirmButtonText = "OK",
             onConfirmButtonClick = { showErrorDialog = false }
         )
     }

@@ -1,6 +1,5 @@
 package com.example.educationalpractice.View
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,14 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -91,16 +87,16 @@ fun RegisterAccount() {
         CustomAlertDialog(
             onDismissRequest = { showEmailErrorDialog = false },
             dialogTitle = "Некорректный email",
-            dialogText = "Email должен быть в формате: name@domenname.ru\n\n" +
-                    "• name - только маленькие буквы и цифры\n" +
-                    "• domenname - только маленькие буквы и цифры\n" +
-                    "• ru - только буквы (минимум 2 символа)\n\n"
+            dialogText = "Email должен быть в формате: name@domenname.ru",
+            iconResId = null
         )
     }
 
     val context = LocalContext.current
     val viewModel: SignUpViewModel = viewModel()
-    var isLoading = viewModel.isLoading
+
+    // Используем поле isLoading из ViewModel
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -229,7 +225,8 @@ fun RegisterAccount() {
             ),
             trailingIcon = {
                 IconButton(
-                    onClick = { passwordVisible = !passwordVisible }
+                    onClick = { passwordVisible = !passwordVisible },
+                    enabled = !isLoading
                 ) {
                     Icon(
                         painter = painterResource(
@@ -260,7 +257,9 @@ fun RegisterAccount() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { isAgreed = !isAgreed },
+                .clickable {
+                    if (!isLoading) isAgreed = !isAgreed
+                },
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -298,77 +297,91 @@ fun RegisterAccount() {
                     textDecoration = TextDecoration.Underline
                 ),
                 fontSize = 16.sp,
-                modifier = Modifier.clickable { isAgreed = !isAgreed }
+                modifier = Modifier.clickable {
+                    if (!isLoading) isAgreed = !isAgreed
+                }
             )
         }
 
         Spacer(Modifier.height(24.dp))
 
-        CustomButton(
-            onClick = {
-                if (email.isBlank() || password.isBlank() || name.isBlank()) {
-                    showValidationError("Пожалуйста, заполните все поля")
-                } else if (!isAgreed) {
-                    showValidationError("Необходимо согласиться с условиями")
-                } else if (password.length < 6) {
-                    showValidationError("Пароль должен содержать не менее 6 символов")
-                } else if (!email.contains("@") || !email.contains(".")) {
-                    showValidationError("Введите корректный email адрес")
-                } else {
-                    isLoading = true
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            CustomButton(
+                onClick = {
+                    if (email.isBlank() || password.isBlank() || name.isBlank()) {
+                        showValidationError("Пожалуйста, заполните все поля")
+                    } else if (!isAgreed) {
+                        showValidationError("Необходимо согласиться с условиями")
+                    } else if (password.length < 6) {
+                        showValidationError("Пароль должен содержать не менее 6 символов")
+                    } else if (!email.contains("@") || !email.contains(".")) {
+                        showValidationError("Введите корректный email адрес")
+                    } else {
+                        isLoading = true
 
-                    viewModel.signUp(
-                        email = email,
-                        password = password,
-                        context = context,
-                        onSuccess = {
-                            isLoading = false
-                            Toast.makeText(context, "Регистрация успешна!", Toast.LENGTH_SHORT).show()
+                        viewModel.signUp(
+                            email = email,
+                            password = password,
+                            context = context,
+                            onSuccess = {
+                                isLoading = false
+                                // Переходим на Verification после успешной регистрации
+                                NavigationManager.navigateTo(Views.Verification.route)
+                            },
+                            onError = { error ->
+                                isLoading = false
+                                // Определяем тип ошибки для красивого отображения
+                                val errorText = when {
+                                    error.contains("отсутствует соединение", ignoreCase = true) ||
+                                            error.contains("unable to resolve host", ignoreCase = true) ||
+                                            error.contains("network", ignoreCase = true) ->
+                                        "Отсутствует соединение с интернетом"
 
-                            // Очистка полей
-                            email = ""
-                            password = ""
-                            name = ""
+                                    error.contains("already registered", ignoreCase = true) ||
+                                            error.contains("already exists", ignoreCase = true) ->
+                                        "Пользователь с таким email уже зарегистрирован"
 
-                            // Переход на экран входа
-                            NavigationManager.navigateTo(Views.SignIn.route)
-                        },
-                        onError = { error ->
-                            isLoading = false
-                            // Определяем тип ошибки для красивого отображения
-                            val errorText = when {
-                                error.contains("отсутствует соединение", ignoreCase = true) ||
-                                        error.contains("unable to resolve host", ignoreCase = true) ||
-                                        error.contains("network", ignoreCase = true) ->
-                                    "Отсутствует соединение с интернетом"
+                                    error.contains("weak password", ignoreCase = true) ||
+                                            error.contains("пароль слишком", ignoreCase = true) ->
+                                        "Пароль слишком слабый. Используйте более сложный пароль"
 
-                                error.contains("already registered", ignoreCase = true) ||
-                                        error.contains("already exists", ignoreCase = true) ->
-                                    "Пользователь с таким email уже зарегистрирован"
+                                    error.contains("timeout", ignoreCase = true) ||
+                                            error.contains("timed out", ignoreCase = true) ->
+                                        "Превышено время ожидания ответа от сервера"
 
-                                error.contains("weak password", ignoreCase = true) ||
-                                        error.contains("пароль слишком", ignoreCase = true) ->
-                                    "Пароль слишком слабый. Используйте более сложный пароль"
+                                    error.contains("server", ignoreCase = true) ||
+                                            error.contains("сервер", ignoreCase = true) ->
+                                        "Ошибка сервера. Попробуйте позже"
 
-                                error.contains("timeout", ignoreCase = true) ||
-                                        error.contains("timed out", ignoreCase = true) ->
-                                    "Превышено время ожидания ответа от сервера"
+                                    else -> error
+                                }
 
-                                error.contains("server", ignoreCase = true) ||
-                                        error.contains("сервер", ignoreCase = true) ->
-                                    "Ошибка сервера. Попробуйте позже"
-
-                                else -> error
+                                showNetworkError(errorText)
                             }
+                        )
+                    }
+                },
+                text = if (isLoading) "" else stringResource(R.string.Sign),
+                enabled = !isLoading && isAgreed && email.isNotBlank() && password.isNotBlank() && name.isNotBlank(),
+                cornerRadius = 14,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                            showNetworkError(errorText)
-                        }
-                    )
-                }
-            },
-            text = if (isLoading) "Регистрация..." else "Зарегистрироваться",
-            enabled = !isLoading && isAgreed
-        )
+            // Индикатор загрузки
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.Center),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            }
+        }
 
         Spacer(Modifier.weight(0.5f))
 
@@ -405,7 +418,9 @@ fun RegisterAccount() {
         CustomAlertDialog(
             onDismissRequest = { showErrorDialog = false },
             dialogTitle = errorTitle,
-            dialogText = errorMessages.joinToString("\n\n")
+            dialogText = errorMessages.joinToString("\n\n"),
+            iconResId = null,
+            confirmButtonText = "ОК"
         )
     }
 }
