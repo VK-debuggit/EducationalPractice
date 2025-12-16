@@ -153,17 +153,6 @@ fun Verification() {
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
-
-            if (savedEmail.isNotBlank()) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Код отправлен на: $savedEmail",
-                    color = Accent,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium
-                )
-            }
         }
 
         Spacer(Modifier.weight(0.1f))

@@ -1,117 +1,55 @@
 package com.example.educationalpractice.View
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.educationalpractice.Data.CustomAlertDialog
 import com.example.educationalpractice.Data.CustomButton
-import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
-import com.example.educationalpractice.ui.theme.Accent
-import com.example.educationalpractice.ui.theme.Background
-import com.example.educationalpractice.ui.theme.Disable
-import com.example.educationalpractice.ui.theme.Hint
-import com.example.educationalpractice.ui.theme.Text as ThemeText
-import com.example.educationalpractice.ui.theme.SubTextDark
+import com.example.educationalpractice.ui.theme.*
 import com.example.educationalpractice.ui.theme.ViewModel.SignUpViewModel
 
 @Composable
 fun SignIn() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Состояния для диалогов ошибок
-    var showEmptyFieldsError by remember { mutableStateOf(false) }
-    var showEmailErrorDialog by remember { mutableStateOf(false) }
-    var showLoginErrorDialog by remember { mutableStateOf(false) }
-    var loginErrorTitle by remember { mutableStateOf("") }
-    var loginErrorMessage by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorTitle by remember { mutableStateOf("Ошибка") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val viewModel: SignUpViewModel = viewModel()
-
-    // Функция валидации email по паттерну "name@domenname.ru"
-    fun isValidEmail(email: String): Boolean {
-        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{2,}\$".toRegex()
-        return pattern.matches(email)
-    }
-
-    // Диалог для ошибки пустых полей
-    if (showEmptyFieldsError) {
-        CustomAlertDialog(
-            onDismissRequest = { showEmptyFieldsError = false },
-            dialogTitle = "Пустые поля",
-            dialogText = "Пожалуйста, заполните все поля",
-        )
-    }
-
-    // Диалог для ошибки формата email
-    if (showEmailErrorDialog) {
-        CustomAlertDialog(
-            onDismissRequest = { showEmailErrorDialog = false },
-            dialogTitle = "Некорректный email",
-            dialogText = "Email должен быть в формате: name@domenname.ru\n\n" +
-                    "• name - только маленькие буквы и цифры\n" +
-                    "• domenname - только маленькие буквы и цифры\n" +
-                    "• ru - только буквы (минимум 2 символа)\n\n",
-        )
-    }
-
-    // Диалог для ошибки входа
-    if (showLoginErrorDialog) {
-        CustomAlertDialog(
-            onDismissRequest = { showLoginErrorDialog = false },
-            dialogTitle = loginErrorTitle,
-            dialogText = loginErrorMessage,
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -119,51 +57,52 @@ fun SignIn() {
             .padding(20.dp)
             .fillMaxSize()
     ) {
-        // Кнопка "Назад" вверху
-        Spacer(Modifier.weight(0.05f))
+        Spacer(Modifier.weight(0.1f))
+
         Image(
             painter = painterResource(id = R.drawable.iconback),
             contentDescription = "Назад",
             modifier = Modifier
                 .clickable(
-                    enabled = !isLoading,
                     onClick = {
                         NavigationManager.navigateBack()
                     }
                 )
-                .size(24.dp)
-                .padding(start = 4.dp)
         )
-        Spacer(Modifier.weight(0.05f))
 
-        // Заголовок экрана
+        Spacer(Modifier.weight(0.1f))
+
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.hello),
-                color = ThemeText,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.SemiBold
+                text = "Вход в аккаунт",
+                style = MaterialTheme.typography.displayMedium, // Heading Regular 32
+                color = Text,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
             Text(
-                text = stringResource(R.string.data),
+                text = "Введите ваши данные",
+                style = MaterialTheme.typography.bodySmall, // Body Regular 16
                 color = SubTextDark,
-                fontSize = 16.sp
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
 
         Spacer(Modifier.weight(0.1f))
 
-        // Поле ввода email
+        // Поле для email
         Text(
-            text = stringResource(R.string.email),
-            color = ThemeText,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            text = "Email",
+            style = MaterialTheme.typography.headlineSmall, // Heading SemiBold 16
+            color = Text
         )
+
+        Spacer(Modifier.height(8.dp))
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -175,21 +114,16 @@ fun SignIn() {
                 focusedContainerColor = Background,
                 unfocusedContainerColor = Background,
                 disabledContainerColor = Background,
-                focusedIndicatorColor = Accent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                focusedTextColor = ThemeText,
-                unfocusedTextColor = ThemeText,
-                disabledTextColor = Disable
+                disabledIndicatorColor = Color.Transparent
             ),
             shape = RoundedCornerShape(14.dp),
             placeholder = {
                 Text(
-                    text = "xyz@gmail.com",
-                    color = Hint
+                    "xyz@gmail.com",
+                    style = MaterialTheme.typography.bodySmall // Body Regular 16
                 )
             },
-            enabled = !isLoading,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -199,13 +133,15 @@ fun SignIn() {
 
         Spacer(Modifier.weight(0.1f))
 
-        // Поле ввода пароля
+        // Поле для пароля
         Text(
-            text = stringResource(R.string.password),
-            color = ThemeText,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            text = "Пароль",
+            style = MaterialTheme.typography.headlineSmall, // Heading SemiBold 16
+            color = Text
         )
+
+        Spacer(Modifier.height(8.dp))
+
         OutlinedTextField(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
@@ -215,42 +151,35 @@ fun SignIn() {
                 focusedContainerColor = Background,
                 unfocusedContainerColor = Background,
                 disabledContainerColor = Background,
-                focusedIndicatorColor = Accent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                focusedTextColor = ThemeText,
-                unfocusedTextColor = ThemeText,
-                disabledTextColor = Disable
+                disabledIndicatorColor = Color.Transparent
             ),
             trailingIcon = {
                 IconButton(
-                    onClick = { passwordVisible = !passwordVisible },
-                    enabled = !isLoading
+                    onClick = { passwordVisible = !passwordVisible }
                 ) {
                     Icon(
                         painter = painterResource(
                             id = if (passwordVisible) R.drawable.eyeopen else R.drawable.eyeclose
                         ),
-                        contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль",
-                        tint = if (isLoading) Disable else Hint
+                        contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
                     )
                 }
             },
             value = password,
             onValueChange = { password = it },
             shape = RoundedCornerShape(14.dp),
-            placeholder = {
-                Text(
-                    text = "Введите пароль",
-                    color = Hint
-                )
-            },
             visualTransformation = if (passwordVisible) {
                 VisualTransformation.None
             } else {
                 PasswordVisualTransformation()
             },
-            enabled = !isLoading,
+            placeholder = {
+                Text(
+                    "Введите пароль",
+                    style = MaterialTheme.typography.bodySmall // Body Regular 16
+                )
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -258,31 +187,25 @@ fun SignIn() {
             )
         )
 
-        Spacer(Modifier.weight(0.02f))
+        Spacer(Modifier.weight(0.05f))
 
-        // Ссылка "Забыли пароль?"
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.Recovery),
+        // Забыли пароль?
+        Text(
+            text = "Забыли пароль?",
+            style = MaterialTheme.typography.bodySmall.copy( // Body Regular 16
                 color = Accent,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier
-                    .clickable(
-                        enabled = !isLoading,
-                        onClick = {
-                            NavigationManager.navigateTo(Views.ForgotPassword.route)
-                        }
-                    )
-            )
-        }
+                textDecoration = TextDecoration.Underline
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    // TODO: Переход на экран восстановления пароля
+                }
+                .padding(vertical = 8.dp),
+            textAlign = TextAlign.End
+        )
 
-        Spacer(Modifier.weight(0.03f))
+        Spacer(Modifier.weight(0.1f))
 
         // Кнопка входа
         Box(
@@ -290,106 +213,115 @@ fun SignIn() {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            CustomButton(
-                onClick = {
-                    // Проверка на пустые поля
-                    if (email.isBlank() || password.isBlank()) {
-                        showEmptyFieldsError = true
-                        return@CustomButton
-                    }
-
-                    // Проверка формата email
-                    if (!isValidEmail(email)) {
-                        showEmailErrorDialog = true
-                        return@CustomButton
-                    }
-
-                    // Начало процесса входа
-                    isLoading = true
-
-                    viewModel.signIn(
-                        email = email,
-                        password = password,
-                        onSuccess = {
-                            isLoading = false
-                            Log.d("SignIn", "Успешный вход")
-
-                            // Показываем Toast об успешном входе
-                            Toast.makeText(
-                                context,
-                                "Добро пожаловать!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            // Переходим на главный экран
-                            NavigationManager.navigateTo(Views.Verification.route)
-                        },
-                        onError = { error ->
-                            isLoading = false
-                            loginErrorTitle = "Ошибка входа"
-                            loginErrorMessage = error
-                            showLoginErrorDialog = true
-
-                            // Логируем ошибку
-                            Log.e("SignIn", "Ошибка входа: $error")
-                        }
-                    )
-                },
-                text = if (isLoading) "" else stringResource(R.string.SignIn),
-                enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
-                cornerRadius = 14,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Индикатор загрузки внутри кнопки
-            if (isLoading) {
+            if (viewModel.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(24.dp)
                         .align(Alignment.Center),
-                    color = White,
+                    color = Accent,
                     strokeWidth = 2.dp
+                )
+            } else {
+                CustomButton(
+                    onClick = {
+                        if (email.isBlank() || password.isBlank()) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Заполните все поля"
+                        } else if (!email.contains("@") || !email.contains(".")) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Введите корректный email"
+                        } else if (password.length < 6) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Пароль должен содержать не менее 6 символов"
+                        } else {
+                            // Вызов метода авторизации
+                            viewModel.signIn(
+                                email = email,
+                                password = password,
+                                onSuccess = {
+                                    // Показываем успешный алерт
+                                    showSuccessDialog = true
+                                },
+                                onError = { error ->
+                                    showErrorDialog = true
+                                    errorTitle = "Ошибка авторизации"
+                                    errorMessage = error
+                                }
+                            )
+                        }
+                    },
+                    text = "Войти",
+                    enabled = !viewModel.isLoading && email.isNotBlank() && password.isNotBlank(),
+                    cornerRadius = 14,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
 
-        Spacer(Modifier.weight(0.5f))
+        Spacer(Modifier.weight(0.3f))
 
-        // Ссылка для перехода к регистрации
+        // Ссылка на регистрацию
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.NewUser),
-                color = Hint,
-                fontSize = 16.sp
+                text = "Ещё нет аккаунта? ",
+                style = MaterialTheme.typography.bodySmall, // Body Regular 16
+                color = Hint
             )
-            Spacer(Modifier.width(4.dp))
             Text(
-                text = stringResource(R.string.Create),
-                color = Accent,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                text = "Зарегистрироваться",
+                style = MaterialTheme.typography.bodySmall, // Body Regular 16
+                color = Text,
                 modifier = Modifier
                     .clickable(
-                        enabled = !isLoading,
                         onClick = {
                             NavigationManager.navigateTo(Views.RegisterAccount.route)
                         }
                     )
             )
         }
+
+        Spacer(Modifier.weight(0.1f))
+    }
+
+    // Диалог ошибки
+    if (showErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            dialogTitle = errorTitle,
+            dialogText = errorMessage,
+            iconResId = null,
+            confirmButtonText = "OK"
+        )
+    }
+
+    // Диалог успешной авторизации
+    if (showSuccessDialog) {
+        CustomAlertDialog(
+            onDismissRequest = { showSuccessDialog = false },
+            dialogTitle = "Успешно!",
+            dialogText = "Авторизация прошла успешно!",
+            iconResId = R.drawable.favorite_fill, // Добавьте иконку успеха если есть
+            confirmButtonText = "OK",
+            onConfirmButtonClick = {
+                showSuccessDialog = false
+                // Можно добавить переход на главный экран
+                // NavigationManager.navigateTo(Views.Main.route)
+            }
+        )
     }
 }
 
 @Preview
 @Composable
 private fun SignInPreview() {
-    EducationalPracticeTheme {
+    EducationalPracticeTheme() {
         SignIn()
     }
 }

@@ -234,7 +234,7 @@ fun CreateNewPassword() {
         // Кнопка сброса пароля
         CustomButton(
             onClick = { resetPassword() },
-            text = if (viewModel.isLoading) "Обновление..." else "Обновить пароль",
+            text = "Обновить пароль",
             enabled = !viewModel.isLoading
         )
 

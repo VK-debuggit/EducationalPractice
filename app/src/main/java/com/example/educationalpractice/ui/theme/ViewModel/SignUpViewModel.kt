@@ -142,6 +142,8 @@ class SignUpViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                Log.d("SIGNIN", "Попытка входа: email=$email")
+
                 val response = RetrofitInstance.userManagementService.signIn(
                     SignInRequest(email, password)
                 )
@@ -149,25 +151,61 @@ class SignUpViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     isLoading = false
                     Log.d("SIGNIN", "Вход успешен")
+
+                    // Сохраняем токен если нужно
+                    val token = response.body()?.access_token
+                    if (token != null) {
+                        // saveTokenToPrefs(token, context) // если нужно сохранить токен
+                    }
+
                     onSuccess()
+
                 } else {
                     isLoading = false
                     val errorBody = response.errorBody()?.string()
                     Log.e("SIGNIN", "Ошибка входа: ${response.code()}, $errorBody")
 
-                    val error = if (errorBody?.contains("email_not_confirmed") == true) {
-                        "Подтвердите email перед входом"
-                    } else {
-                        "Неверный email или пароль"
+                    val error = when {
+                        errorBody?.contains("email_not_confirmed") == true ||
+                                errorBody?.contains("Email not confirmed") == true -> {
+                            // Если email не подтвержден, предлагаем перейти на верификацию
+                            "Подтвердите email перед входом"
+                        }
+                        errorBody?.contains("Invalid login") == true ||
+                                errorBody?.contains("invalid_credentials") == true ->
+                            "Неверный email или пароль"
+
+                        response.code() == 400 -> "Некорректные данные"
+                        response.code() == 429 -> "Слишком много попыток. Попробуйте позже"
+                        else -> "Ошибка авторизации"
                     }
                     onError(error)
                 }
             } catch (e: Exception) {
                 isLoading = false
                 Log.e("SIGNIN", "Сетевая ошибка: ${e.message}")
-                onError("Ошибка сети")
+
+                val errorMsg = when {
+                    e.message?.contains("Unable to resolve host") == true ->
+                        "Отсутствует соединение с интернетом"
+                    e.message?.contains("timeout") == true ->
+                        "Превышено время ожидания"
+                    else -> "Ошибка сети"
+                }
+                onError(errorMsg)
             }
         }
+    }
+
+    // В SignUpViewModel добавьте:
+    private fun saveTokenToPrefs(token: String, context: Context) {
+        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+        prefs.edit().putString("auth_token", token).apply()
+    }
+
+    fun getTokenFromPrefs(context: Context): String {
+        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+        return prefs.getString("auth_token", "") ?: ""
     }
 
     // Вспомогательные методы
