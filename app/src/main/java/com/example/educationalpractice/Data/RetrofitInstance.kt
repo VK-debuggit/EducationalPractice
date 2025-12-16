@@ -6,8 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.net.InetSocketAddress
 import java.net.Proxy
 
-//const val SUPABASE_URL = "https://favuckhcdbijjjmorjbu.supabase.co/"
-const val SUPABASE_URL = "https://voeknphobxqsiwmlmgbm.supabase.co/"
+const val SUPABASE_URL = "https://favuckhcdbijjjmorjbu.supabase.co/"
+//const val SUPABASE_URL = "https://voeknphobxqsiwmlmgbm.supabase.co/"
 
 object RetrofitInstance {
 //    private val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress("10.207.106.77", 3128))

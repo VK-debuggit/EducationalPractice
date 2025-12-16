@@ -37,30 +37,96 @@ class SignUpViewModel : ViewModel() {
     var pendingPassword = ""
     private var savedEmail = ""
 
-    fun signUp(email: String, password: String, context: Context, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+//    fun signUp(email: String, password: String, context: Context, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+//        isLoading = true
+//        viewModelScope.launch {
+//            try {
+//                val response = RetrofitInstance.userManagementService.signUp(
+//                    SignUpRequest(
+//                        email,
+//                        password
+//                    )
+//                )
+//
+//                if (response.isSuccessful) {
+//                    // Сохраняем email в SharedPreferences и в переменную
+//                    saveEmailToPrefs(email, context)
+//                    savedEmail = email
+//                    isLoading = false
+//                    onSuccess(email)
+//                } else {
+//                    isLoading = false
+//                    onError("Ошибка регистрации")
+//                }
+//            } catch (e: Exception) {
+//                isLoading = false
+//                onError("Ошибка сети: ${e.message}")
+//            }
+//        }
+//    }
+
+    // Регистрация без подтверждения
+    fun signUp(
+        email: String,
+        password: String,
+        context: Context,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         isLoading = true
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.userManagementService.signUp(
-                    SignUpRequest(
-                        email,
-                        password
-                    )
+                    SignUpRequest(email, password)
                 )
 
                 if (response.isSuccessful) {
-                    // Сохраняем email в SharedPreferences и в переменную
-                    saveEmailToPrefs(email, context)
-                    savedEmail = email
-                    isLoading = false
-                    onSuccess(email)
+                    signInAfterRegistration(email, password, onSuccess, onError)
                 } else {
                     isLoading = false
-                    onError("Ошибка регистрации")
+                    val errorBody = response.errorBody()?.string()
+                    when {
+                        errorBody?.contains("already registered") == true ->
+                            onError("Пользователь уже зарегистрирован")
+                        errorBody?.contains("weak_password") == true ->
+                            onError("Пароль слишком слабый")
+                        else -> onError("Ошибка регистрации: ${response.code()}")
+                    }
                 }
             } catch (e: Exception) {
                 isLoading = false
-                onError("Ошибка сети: ${e.message}")
+                if (e.message?.contains("Unable to resolve host") == true) {
+                    onError("Отсутствует соединение с интернетом")
+                } else {
+                    onError("Ошибка сети: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun signInAfterRegistration(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.userManagementService.signIn(
+                    SignInRequest(email, password)
+                )
+
+                if (response.isSuccessful) {
+                    isLoading = false
+                    onSuccess() // Успешный вход после регистрации
+                } else {
+                    isLoading = false
+                    // Если вход не удался, все равно считаем регистрацию успешной
+                    onSuccess() // Переходим на экран Sign In
+                }
+            } catch (e: Exception) {
+                isLoading = false
+                onSuccess() // В любом случае переходим к входу
             }
         }
     }
