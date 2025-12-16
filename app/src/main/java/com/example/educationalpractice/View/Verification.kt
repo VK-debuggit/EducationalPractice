@@ -2,7 +2,6 @@ package com.example.educationalpractice.View
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,32 +42,28 @@ fun Verification() {
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
+    // Состояния для таймера
     var timeRemaining by remember { mutableStateOf(60) }
     var isTimerActive by remember { mutableStateOf(true) }
-    val canResend by remember { derivedStateOf { timeRemaining == 0 } }
-
-    var showOtpError by remember { mutableStateOf(false) }
 
     val viewModel: SignUpViewModel = viewModel()
     val context = LocalContext.current
 
-    // Получаем сохраненный email из ViewModel
+    // Получаем email
     var savedEmail by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
 
-    // Получаем email при инициализации
     LaunchedEffect(Unit) {
-        // Используем методы из вашего ViewModel
-        savedEmail = viewModel.getEmailFromPrefs(context).ifEmpty { viewModel.getEmail() }
+        savedEmail = viewModel.getEmailFromPrefs(context)
     }
 
+    // Запускаем таймер только если он активен
     LaunchedEffect(isTimerActive) {
         if (isTimerActive) {
             while (timeRemaining > 0) {
                 delay(1000)
                 timeRemaining--
             }
-            isTimerActive = false
+            isTimerActive = false // Таймер закончился
         }
     }
 
@@ -79,47 +74,40 @@ fun Verification() {
         val otpCode = getFullOtpCode()
 
         if (otpCode.length != 6) {
-            showOtpError = true
             errorMessage = "Введите все 6 цифр кода"
             showErrorDialog = true
             return
         }
 
-        isLoading = true
-
-        // Используем ваш метод verifyCode из ViewModel
         viewModel.verifyCode(
             code = otpCode,
             context = context,
             onSuccess = {
-                isLoading = false
-                // После успешной верификации переходим на SignIn
                 NavigationManager.navigateTo(Views.SignIn.route)
             },
             onError = { error ->
-                isLoading = false
-                showOtpError = true
                 errorMessage = error
                 showErrorDialog = true
             }
         )
     }
 
+    // Функция для повторной отправки кода
     fun resendOtpCode() {
-        if (canResend) {
-            timeRemaining = 60
-            isTimerActive = true
-            otpFields.forEach { it.value = "" }
-            showOtpError = false
-            focusRequesters[0].requestFocus()
+        // Сбрасываем таймер
+        timeRemaining = 60
+        isTimerActive = true
+        otpFields.forEach { it.value = "" }
 
-            // Показываем сообщение
-            errorMessage = "Новый код отправлен на $savedEmail"
-            showErrorDialog = true
+        // Запрашиваем фокус на первое поле
+        focusRequesters[0].requestFocus()
 
-            // TODO: Здесь можно вызвать метод для повторной отправки кода если он есть в ViewModel
-            // viewModel.resendVerificationCode(context, onSuccess = {}, onError = {})
-        }
+        // Показываем сообщение
+        errorMessage = "Новый код отправлен на $savedEmail"
+        showErrorDialog = true
+
+        // TODO: Вызвать метод ViewModel для повторной отправки OTP
+        // viewModel.resendOtpCode(context, onSuccess = { }, onError = { })
     }
 
     Column(
@@ -135,7 +123,6 @@ fun Verification() {
             contentDescription = "Назад",
             modifier = Modifier
                 .clickable(
-                    enabled = !isLoading,
                     onClick = {
                         NavigationManager.navigateBack()
                     }
@@ -167,7 +154,6 @@ fun Verification() {
                 textAlign = TextAlign.Center
             )
 
-            // Показываем email на который отправлен код
             if (savedEmail.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -201,7 +187,6 @@ fun Verification() {
                     onValueChange = { newValue ->
                         if (newValue.length <= 1 && newValue.all { it.isDigit() }) {
                             otpFields[i].value = newValue
-                            showOtpError = false
 
                             if (newValue.isNotEmpty() && i < 5) {
                                 focusRequesters[i + 1].requestFocus()
@@ -215,32 +200,48 @@ fun Verification() {
                             focusRequesters[i - 1].requestFocus()
                         }
                     },
-                    focusRequester = focusRequesters[i],
-                    isError = showOtpError,
-                    enabled = !isLoading
+                    focusRequester = focusRequesters[i]
                 )
             }
         }
 
         Spacer(Modifier.weight(0.1f))
 
-        Text(
-            text = if (canResend) {
-                "Отправить код повторно"
+        // Блок с таймером/повторной отправкой
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End, // Таймер всегда справа
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isTimerActive) {
+                // Таймер активен - показываем время справа
+                Text(
+                    text = formatTime(timeRemaining),
+                    color = SubTextDark,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             } else {
-                val minutes = timeRemaining / 60
-                val seconds = timeRemaining % 60
-                "${String.format("%02d:%02d", minutes, seconds)}"
-            },
-            color = if (canResend) Accent else SubTextDark,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(enabled = canResend && !isLoading, onClick = { resendOtpCode() })
-                .padding(vertical = 8.dp),
-            textAlign = TextAlign.Center
-        )
+                // Таймер закончился - кнопка "Отправить снова" слева
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start // Текст слева
+                ) {
+                    Text(
+                        text = "Отправить снова",
+                        color = Accent,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clickable(
+                                onClick = { resendOtpCode() }
+                            )
+                            .padding(vertical = 8.dp)
+                    )
+                }
+            }
+        }
 
         Spacer(Modifier.weight(0.8f))
     }
@@ -249,27 +250,27 @@ fun Verification() {
         CustomAlertDialog(
             onDismissRequest = {
                 showErrorDialog = false
-                showOtpError = false
             },
-            dialogTitle = "Ошибка",
+            dialogTitle = if (errorMessage.contains("новый код")) "Информация" else "Ошибка",
             dialogText = errorMessage,
             iconResId = null,
-            confirmButtonText = "OK",
-            onConfirmButtonClick = {
-                showErrorDialog = false
-                showOtpError = false
-            }
+            confirmButtonText = "OK"
         )
     }
+}
+
+// Функция для форматирования времени
+private fun formatTime(seconds: Int): String {
+    val minutes = seconds / 60
+    val secs = seconds % 60
+    return String.format("%02d:%02d", minutes, secs)
 }
 
 @Composable
 fun OtpDigitBox(
     value: String,
     onValueChange: (String) -> Unit,
-    focusRequester: FocusRequester,
-    isError: Boolean,
-    enabled: Boolean = true
+    focusRequester: FocusRequester
 ) {
     BasicTextField(
         value = value,
@@ -278,42 +279,24 @@ fun OtpDigitBox(
             .width(46.dp)
             .height(99.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isError) Color(0xFFFFEBEE) else Background,
-                RoundedCornerShape(14.dp)
-            )
+            .background(Background, RoundedCornerShape(14.dp))
             .focusRequester(focusRequester),
         textStyle = LocalTextStyle.current.copy(
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = if (isError) Color.Red else Text
+            color = Text
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Next
         ),
         singleLine = true,
-        enabled = enabled,
         decorationBox = { innerTextField ->
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(
-                        width = if (isError) 2.dp else 0.dp,
-                        color = if (isError) Color.Red else Color.Transparent,
-                        shape = RoundedCornerShape(14.dp)
-                    ),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (value.isEmpty()) {
-                    Text(
-                        text = "•",
-                        color = if (isError) Color.Red else SubTextDark,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
                 innerTextField()
             }
         }

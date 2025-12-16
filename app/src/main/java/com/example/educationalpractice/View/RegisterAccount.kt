@@ -7,17 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,50 +44,13 @@ fun RegisterAccount() {
     var password by remember { mutableStateOf("") }
     var isAgreed by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
-    var showEmailErrorDialog by remember { mutableStateOf(false) }
 
-    // Единое состояние для отображения ошибок
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorTitle by remember { mutableStateOf("Ошибка") }
-    var errorMessages by remember { mutableStateOf(emptyList<String>()) }
-
-    // Функция для показа ошибок
-    fun showError(title: String, messages: List<String>) {
-        errorTitle = title
-        errorMessages = messages
-        showErrorDialog = true
-    }
-
-    // Функция для показа ошибок сети/сервера
-    fun showNetworkError(error: String) {
-        showError("Ошибка соединения", listOf(error))
-    }
-
-    // Функция для показа ошибок валидации
-    fun showValidationError(message: String) {
-        showError("Ошибка заполнения", listOf(message))
-    }
-
-    // Функция валидации email по паттерну "name@domenname.ru"
-    fun isValidEmail(email: String): Boolean {
-        val pattern = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]{2,}\$".toRegex()
-        return pattern.matches(email)
-    }
-
-    if (showEmailErrorDialog) {
-        CustomAlertDialog(
-            onDismissRequest = { showEmailErrorDialog = false },
-            dialogTitle = "Некорректный email",
-            dialogText = "Email должен быть в формате: name@domenname.ru",
-            iconResId = null
-        )
-    }
+    var errorMessage by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val viewModel: SignUpViewModel = viewModel()
-
-    // Используем поле isLoading из ViewModel
-    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -111,7 +65,6 @@ fun RegisterAccount() {
             contentDescription = "Назад",
             modifier = Modifier
                 .clickable(
-                    enabled = !isLoading,
                     onClick = {
                         NavigationManager.navigateTo(Views.SignIn.route)
                     }
@@ -127,6 +80,7 @@ fun RegisterAccount() {
             Text(
                 text = stringResource(R.string.welcome_mes),
                 color = Text,
+                style = MaterialTheme.typography.displayMedium,
                 fontSize = 32.sp,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -165,8 +119,7 @@ fun RegisterAccount() {
             shape = RoundedCornerShape(14.dp),
             value = name,
             placeholder = { Text("xxxxxxxx") },
-            onValueChange = { name = it },
-            enabled = !isLoading
+            onValueChange = { name = it }
         )
 
         Spacer(Modifier.weight(0.1f))
@@ -194,7 +147,6 @@ fun RegisterAccount() {
             ),
             shape = RoundedCornerShape(14.dp),
             placeholder = { Text("xyz@gmail.com") },
-            enabled = !isLoading,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -225,8 +177,7 @@ fun RegisterAccount() {
             ),
             trailingIcon = {
                 IconButton(
-                    onClick = { passwordVisible = !passwordVisible },
-                    enabled = !isLoading
+                    onClick = { passwordVisible = !passwordVisible }
                 ) {
                     Icon(
                         painter = painterResource(
@@ -244,7 +195,6 @@ fun RegisterAccount() {
             } else {
                 PasswordVisualTransformation()
             },
-            enabled = !isLoading,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -258,7 +208,7 @@ fun RegisterAccount() {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    if (!isLoading) isAgreed = !isAgreed
+                    isAgreed = !isAgreed
                 },
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
@@ -298,7 +248,7 @@ fun RegisterAccount() {
                 ),
                 fontSize = 16.sp,
                 modifier = Modifier.clickable {
-                    if (!isLoading) isAgreed = !isAgreed
+                    isAgreed = !isAgreed
                 }
             )
         }
@@ -310,75 +260,57 @@ fun RegisterAccount() {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            CustomButton(
-                onClick = {
-                    if (email.isBlank() || password.isBlank() || name.isBlank()) {
-                        showValidationError("Пожалуйста, заполните все поля")
-                    } else if (!isAgreed) {
-                        showValidationError("Необходимо согласиться с условиями")
-                    } else if (password.length < 6) {
-                        showValidationError("Пароль должен содержать не менее 6 символов")
-                    } else if (!email.contains("@") || !email.contains(".")) {
-                        showValidationError("Введите корректный email адрес")
-                    } else {
-                        isLoading = true
-
-                        viewModel.signUp(
-                            email = email,
-                            password = password,
-                            context = context,
-                            onSuccess = {
-                                isLoading = false
-                                // Переходим на Verification после успешной регистрации
-                                NavigationManager.navigateTo(Views.Verification.route)
-                            },
-                            onError = { error ->
-                                isLoading = false
-                                // Определяем тип ошибки для красивого отображения
-                                val errorText = when {
-                                    error.contains("отсутствует соединение", ignoreCase = true) ||
-                                            error.contains("unable to resolve host", ignoreCase = true) ||
-                                            error.contains("network", ignoreCase = true) ->
-                                        "Отсутствует соединение с интернетом"
-
-                                    error.contains("already registered", ignoreCase = true) ||
-                                            error.contains("already exists", ignoreCase = true) ->
-                                        "Пользователь с таким email уже зарегистрирован"
-
-                                    error.contains("weak password", ignoreCase = true) ||
-                                            error.contains("пароль слишком", ignoreCase = true) ->
-                                        "Пароль слишком слабый. Используйте более сложный пароль"
-
-                                    error.contains("timeout", ignoreCase = true) ||
-                                            error.contains("timed out", ignoreCase = true) ->
-                                        "Превышено время ожидания ответа от сервера"
-
-                                    error.contains("server", ignoreCase = true) ||
-                                            error.contains("сервер", ignoreCase = true) ->
-                                        "Ошибка сервера. Попробуйте позже"
-
-                                    else -> error
-                                }
-
-                                showNetworkError(errorText)
-                            }
-                        )
-                    }
-                },
-                text = if (isLoading) "" else stringResource(R.string.Sign),
-                enabled = !isLoading && isAgreed && email.isNotBlank() && password.isNotBlank() && name.isNotBlank(),
-                cornerRadius = 14,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Индикатор загрузки
-            if (isLoading) {
+            if (viewModel.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(24.dp)
                         .align(Alignment.Center),
-                    color = Color.White,
+                    color = Accent,
                     strokeWidth = 2.dp
+                )
+            } else {
+                CustomButton(
+                    onClick = {
+                        // Валидация полей
+                        if (email.isBlank() || password.isBlank() || name.isBlank()) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка заполнения"
+                            errorMessage = "Пожалуйста, заполните все поля"
+                        } else if (!isAgreed) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Необходимо согласиться с условиями"
+                        } else if (password.length < 6) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Пароль должен содержать не менее 6 символов"
+                        } else if (!email.contains("@") || !email.contains(".")) {
+                            showErrorDialog = true
+                            errorTitle = "Ошибка"
+                            errorMessage = "Введите корректный email адрес"
+                        } else {
+                            // Вызов метода регистрации
+                            viewModel.signUp(
+                                email = email,
+                                password = password,
+                                context = context,
+                                onSuccess = { email ->
+                                    // После успешной регистрации переходим на верификацию
+                                    NavigationManager.navigateTo(Views.Verification.route)
+                                },
+                                onError = { error ->
+                                    showErrorDialog = true
+                                    errorTitle = "Ошибка регистрации"
+                                    errorMessage = error
+                                }
+                            )
+                        }
+                    },
+                    text = stringResource(R.string.Sign),
+                    enabled = !viewModel.isLoading && isAgreed && email.isNotBlank() &&
+                            password.isNotBlank() && name.isNotBlank(),
+                    cornerRadius = 14,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -402,7 +334,6 @@ fun RegisterAccount() {
                 fontSize = 16.sp,
                 modifier = Modifier
                     .clickable(
-                        enabled = !isLoading,
                         onClick = {
                             NavigationManager.navigateTo(Views.SignIn.route)
                         }
@@ -413,12 +344,11 @@ fun RegisterAccount() {
         Spacer(Modifier.weight(0.1f))
     }
 
-    // Единый диалог для всех ошибок
     if (showErrorDialog) {
         CustomAlertDialog(
             onDismissRequest = { showErrorDialog = false },
             dialogTitle = errorTitle,
-            dialogText = errorMessages.joinToString("\n\n"),
+            dialogText = errorMessage,
             iconResId = null,
             confirmButtonText = "ОК"
         )
