@@ -1,0 +1,301 @@
+package com.example.educationalpractice.View
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.educationalpractice.Data.CustomAlertDialog
+import com.example.educationalpractice.R
+import com.example.educationalpractice.navigation.NavigationManager
+import com.example.educationalpractice.navigation.Views
+import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.ui.theme.ViewModel.SignUpViewModel
+import kotlinx.coroutines.delay
+
+@Composable
+fun Verification() {
+    val otpFields = remember { Array(6) { mutableStateOf("") } }
+    val focusRequesters = remember { Array(6) { FocusRequester() } }
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    // Состояния для таймера
+    var timeRemaining by remember { mutableStateOf(60) }
+    var isTimerActive by remember { mutableStateOf(true) }
+
+    val viewModel: SignUpViewModel = viewModel()
+    val context = LocalContext.current
+
+    // Получаем email
+    var savedEmail by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        savedEmail = viewModel.getEmailFromPrefs(context)
+    }
+
+    // Запускаем таймер только если он активен
+    LaunchedEffect(isTimerActive) {
+        if (isTimerActive) {
+            while (timeRemaining > 0) {
+                delay(1000)
+                timeRemaining--
+            }
+            isTimerActive = false // Таймер закончился
+        }
+    }
+
+    fun getFullOtpCode(): String = otpFields.joinToString("") { it.value }
+    fun isOtpComplete(): Boolean = otpFields.all { it.value.isNotBlank() }
+
+    fun verifyOtpCode() {
+        val otpCode = getFullOtpCode()
+
+        if (otpCode.length != 6) {
+            errorMessage = "Введите все 6 цифр кода"
+            showErrorDialog = true
+            return
+        }
+
+        viewModel.verifyCode(
+            code = otpCode,
+            context = context,
+            onSuccess = {
+                NavigationManager.navigateTo(Views.SignIn.route)
+            },
+            onError = { error ->
+                errorMessage = error
+                showErrorDialog = true
+            }
+        )
+    }
+
+    // Функция для повторной отправки кода
+    fun resendOtpCode() {
+        // Сбрасываем таймер
+        timeRemaining = 60
+        isTimerActive = true
+        otpFields.forEach { it.value = "" }
+
+        // Запрашиваем фокус на первое поле
+        focusRequesters[0].requestFocus()
+
+        // Показываем сообщение
+        errorMessage = "Новый код отправлен на $savedEmail"
+        showErrorDialog = true
+
+        // TODO: Вызвать метод ViewModel для повторной отправки OTP
+        // viewModel.resendOtpCode(context, onSuccess = { }, onError = { })
+    }
+
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(20.dp)
+            .fillMaxSize()
+    ) {
+        Spacer(Modifier.weight(0.1f))
+
+        Image(
+            painter = painterResource(id = R.drawable.iconback),
+            contentDescription = "Назад",
+            modifier = Modifier
+                .clickable(
+                    onClick = {
+                        NavigationManager.navigateBack()
+                    }
+                )
+                .size(24.dp)
+                .padding(start = 4.dp)
+        )
+
+        Spacer(Modifier.weight(0.1f))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.OTP),
+                color = Text,
+                fontSize = 32.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.Please),
+                color = SubTextDark,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(Modifier.weight(0.1f))
+
+        Text(
+            text = stringResource(R.string.OTPCode),
+            color = Text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            for (i in 0 until 6) {
+                OtpDigitBox(
+                    value = otpFields[i].value,
+                    onValueChange = { newValue ->
+                        if (newValue.length <= 1 && newValue.all { it.isDigit() }) {
+                            otpFields[i].value = newValue
+
+                            if (newValue.isNotEmpty() && i < 5) {
+                                focusRequesters[i + 1].requestFocus()
+                            }
+
+                            if (i == 5 && isOtpComplete()) {
+                                verifyOtpCode()
+                            }
+                        } else if (newValue.isEmpty() && i > 0) {
+                            otpFields[i].value = ""
+                            focusRequesters[i - 1].requestFocus()
+                        }
+                    },
+                    focusRequester = focusRequesters[i]
+                )
+            }
+        }
+
+        Spacer(Modifier.weight(0.1f))
+
+        // Блок с таймером/повторной отправкой
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End, // Таймер всегда справа
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isTimerActive) {
+                // Таймер активен - показываем время справа
+                Text(
+                    text = formatTime(timeRemaining),
+                    color = SubTextDark,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                // Таймер закончился - кнопка "Отправить снова" слева
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start // Текст слева
+                ) {
+                    Text(
+                        text = "Отправить снова",
+                        color = Accent,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clickable(
+                                onClick = { resendOtpCode() }
+                            )
+                            .padding(vertical = 8.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.weight(0.8f))
+    }
+
+    if (showErrorDialog) {
+        CustomAlertDialog(
+            onDismissRequest = {
+                showErrorDialog = false
+            },
+            dialogTitle = if (errorMessage.contains("новый код")) "Информация" else "Ошибка",
+            dialogText = errorMessage,
+            iconResId = null,
+            confirmButtonText = "OK"
+        )
+    }
+}
+
+// Функция для форматирования времени
+private fun formatTime(seconds: Int): String {
+    val minutes = seconds / 60
+    val secs = seconds % 60
+    return String.format("%02d:%02d", minutes, secs)
+}
+
+@Composable
+fun OtpDigitBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    focusRequester: FocusRequester
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .width(46.dp)
+            .height(99.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Background, RoundedCornerShape(14.dp))
+            .focusRequester(focusRequester),
+        textStyle = LocalTextStyle.current.copy(
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Text
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true,
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
+            }
+        }
+    )
+}
+
+@Preview
+@Composable
+private fun VerificationPreview() {
+    EducationalPracticeTheme() {
+        Verification()
+    }
+}
