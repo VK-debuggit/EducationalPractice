@@ -1,8 +1,6 @@
-// NavGraph.kt
 package com.example.educationalpractice.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,13 +39,22 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Views.RegisterAccount.route
+        startDestination = Views.Onboarding.route
     ) {
-        composable(Views.CreateNewPassword.route) {
-            CreateNewPassword()
+        composable(Views.Onboarding.route) {
+            Onboard()
+        }
+        composable(Views.OnboardScreen2.route) {
+            OnboardScreen2()
+        }
+        composable(Views.OnboardScreen3.route) {
+            OnboardScreen3()
         }
         composable(Views.RegisterAccount.route) {
             RegisterAccount()
+        }
+        composable(Views.CreateNewPassword.route) {
+            CreateNewPassword()
         }
         composable(Views.SignIn.route) {
             SignIn()
@@ -62,6 +69,9 @@ fun AppNavigation() {
 }
 
 sealed class Views(val route: String) {
+    object Onboarding : Views("onboarding")
+    object OnboardScreen2 : Views("onboardscreen2")
+    object OnboardScreen3 : Views("onboardscreen3")
     object CreateNewPassword : Views("create_new_password")
     object RegisterAccount : Views("register_account")
     object SignIn : Views("sign_in")
