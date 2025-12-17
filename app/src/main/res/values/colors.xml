@@ -8,4 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="Splash">#FF48B2E7</color>
+    <color name="Accent">#FF48B2E7</color>
+    <color name="Disable">#FF2B6B8B</color>
 </resources>

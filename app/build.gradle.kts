@@ -60,6 +60,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
     implementation("androidx.compose.animation:animation:1.6.0")
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
