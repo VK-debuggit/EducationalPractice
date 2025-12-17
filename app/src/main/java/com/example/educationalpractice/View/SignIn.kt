@@ -12,12 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -26,10 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.educationalpractice.Data.CustomAlertDialog
-import com.example.educationalpractice.Data.CustomButton
+import com.example.educationalpractice.Data.Components.CustomAlertDialog
+import com.example.educationalpractice.Data.Components.CustomButton
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
@@ -77,14 +73,14 @@ fun SignIn() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Вход в аккаунт",
+                text = stringResource(R.string.hello),
                 style = MaterialTheme.typography.displayMedium, // Heading Regular 32
                 color = Text,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Введите ваши данные",
+                text = stringResource(R.string.data),
                 style = MaterialTheme.typography.bodySmall, // Body Regular 16
                 color = SubTextDark,
                 modifier = Modifier.fillMaxWidth(),
@@ -96,7 +92,7 @@ fun SignIn() {
 
         // Поле для email
         Text(
-            text = "Email",
+            text = stringResource(R.string.email),
             style = MaterialTheme.typography.headlineSmall, // Heading SemiBold 16
             color = Text
         )
@@ -135,7 +131,7 @@ fun SignIn() {
 
         // Поле для пароля
         Text(
-            text = "Пароль",
+            text = stringResource(R.string.password),
             style = MaterialTheme.typography.headlineSmall, // Heading SemiBold 16
             color = Text
         )
@@ -191,16 +187,13 @@ fun SignIn() {
 
         // Забыли пароль?
         Text(
-            text = "Забыли пароль?",
+            text = stringResource(R.string.Recovery),
             style = MaterialTheme.typography.bodySmall.copy( // Body Regular 16
                 color = Accent,
                 textDecoration = TextDecoration.Underline
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    // TODO: Переход на экран восстановления пароля
-                }
                 .padding(vertical = 8.dp),
             textAlign = TextAlign.End
         )
@@ -253,7 +246,7 @@ fun SignIn() {
                             )
                         }
                     },
-                    text = "Войти",
+                    text = stringResource(R.string.Invite),
                     enabled = !viewModel.isLoading && email.isNotBlank() && password.isNotBlank(),
                     cornerRadius = 14,
                     modifier = Modifier.fillMaxWidth()
@@ -270,12 +263,12 @@ fun SignIn() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Ещё нет аккаунта? ",
+                text = stringResource(R.string.NewUser),
                 style = MaterialTheme.typography.bodySmall, // Body Regular 16
                 color = Hint
             )
             Text(
-                text = "Зарегистрироваться",
+                text = stringResource(R.string.Create),
                 style = MaterialTheme.typography.bodySmall, // Body Regular 16
                 color = Text,
                 modifier = Modifier

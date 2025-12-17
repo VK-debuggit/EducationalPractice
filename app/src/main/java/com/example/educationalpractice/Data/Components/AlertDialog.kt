@@ -1,11 +1,10 @@
-package com.example.educationalpractice.Data
+package com.example.educationalpractice.Data.Components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.unit.sp
 import com.example.educationalpractice.ui.theme.SubTextDark
-import com.example.educationalpractice.ui.theme.Text
 
 //Компонент: диалоговое окно
 //@Composable
@@ -68,20 +67,16 @@ import com.example.educationalpractice.ui.theme.Text
 //    )
 //}
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.educationalpractice.R
 import com.example.educationalpractice.ui.theme.Accent
-import com.example.educationalpractice.ui.theme.SubTextDark
 import com.example.educationalpractice.ui.theme.Text as ThemeText
 
 @Composable
@@ -113,7 +108,7 @@ fun CustomAlertDialog(
                 text = dialogTitle,
                 color = ThemeText,
                 fontSize = 18.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
         },
         text = {
@@ -131,7 +126,7 @@ fun CustomAlertDialog(
                 Text(
                     text = confirmButtonText,
                     fontSize = 16.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    fontWeight = FontWeight.Medium
                 )
             }
         },
@@ -143,7 +138,7 @@ fun CustomAlertDialog(
                     Text(
                         text = dismissButtonText,
                         fontSize = 16.sp,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }

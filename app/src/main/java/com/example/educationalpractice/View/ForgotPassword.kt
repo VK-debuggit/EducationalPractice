@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.educationalpractice.Data.CustomAlertDialog
-import com.example.educationalpractice.Data.CustomButton
+import com.example.educationalpractice.Data.Components.CustomAlertDialog
+import com.example.educationalpractice.Data.Components.CustomButton
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
