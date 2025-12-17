@@ -32,7 +32,6 @@ fun PageIndicatorSimple(
             val width = if (isActive) activeIndicatorWidth.dp else inactiveIndicatorWidth.dp
             val color = if (isActive) activeColor else inactiveColor
 
-            // Используем Spacer с фоном вместо Box с clip
             Spacer(
                 modifier = Modifier
                     .width(width)
