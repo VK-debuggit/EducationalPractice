@@ -237,6 +237,7 @@ fun SignIn() {
                                 onSuccess = {
                                     // Показываем успешный алерт
                                     showSuccessDialog = true
+                                    NavigationManager.navigateTo(Views.Home.route)
                                 },
                                 onError = { error ->
                                     showErrorDialog = true

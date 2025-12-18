@@ -43,8 +43,6 @@ import com.example.educationalpractice.ui.theme.Hint
 import com.example.educationalpractice.ui.theme.Text
 import com.example.educationalpractice.ui.theme.Typography
 
-// ... ваш остальной код ...
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(modifier: Modifier) {
