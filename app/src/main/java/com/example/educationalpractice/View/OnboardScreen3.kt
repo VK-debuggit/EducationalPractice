@@ -5,33 +5,38 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.unit.dp
 import com.example.educationalpractice.Data.Components.CustomButton
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
 import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.utils.OnboardingManager
 
 @Composable
 fun OnboardScreen3(
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val onboardingManager = remember { OnboardingManager(context) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -48,10 +53,8 @@ fun OnboardScreen3(
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Верхняя часть
         Spacer(Modifier.weight(0.15f))
 
-        // Изображение с анимацией прихода
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,6 +80,7 @@ fun OnboardScreen3(
                 )
             }
         }
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 20.dp)
@@ -100,13 +104,11 @@ fun OnboardScreen3(
 
         Spacer(Modifier.weight(0.05f))
 
-        // Индикаторы (третья страница активна)
         Row(
             modifier = Modifier
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Неактивные индикаторы
             Spacer(
                 modifier = Modifier
                     .width(28.dp)
@@ -119,7 +121,6 @@ fun OnboardScreen3(
                     .height(4.dp)
                     .background(SubTextLight.copy(alpha = 0.3f), androidx.compose.foundation.shape.RoundedCornerShape(50))
             )
-            // Активный индикатор (третья страница)
             Spacer(
                 modifier = Modifier
                     .width(43.dp)
@@ -130,7 +131,6 @@ fun OnboardScreen3(
 
         Spacer(Modifier.weight(0.05f))
 
-        // Кнопка "Начать" (на последнем экране)
         Box(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -138,7 +138,7 @@ fun OnboardScreen3(
         ) {
             CustomButton(
                 onClick = {
-                    // Переход на экран регистрации
+                    onboardingManager.setOnboardingCompleted()
                     NavigationManager.navigateTo(Views.RegisterAccount.route)
                 },
                 text = stringResource(R.string.start),

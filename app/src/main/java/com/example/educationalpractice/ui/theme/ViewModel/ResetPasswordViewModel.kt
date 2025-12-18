@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.educationalpractice.Data.Model.UpdatePasswordRequest
-import com.example.educationalpractice.Data.RetrofitInstance
+import com.example.educationalpractice.Data.Service.RetrofitInstance
 import kotlinx.coroutines.launch
 
 class ResetPasswordViewModel : ViewModel() {

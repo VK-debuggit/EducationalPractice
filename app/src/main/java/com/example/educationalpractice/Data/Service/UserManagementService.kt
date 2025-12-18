@@ -9,6 +9,7 @@ import com.example.educationalpractice.Data.Model.UpdatePasswordRequest
 import com.example.educationalpractice.Data.Model.VerifyOtpRequest
 import com.example.educationalpractice.Data.Model.VerifyRequest
 import com.example.educationalpractice.Data.Model.VerifyResponse
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -18,7 +19,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 const val API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdnVja2hjZGJpampqbW9yamJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3MjcwOTUsImV4cCI6MjA3NTMwMzA5NX0.w6ju-0JuLllWpk0vwdJdDER4tb_cGtUbK2d1J4ZvN1E"
-//const val API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvZWtucGhvYnhxc2l3bWxtZ2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjM1ODgsImV4cCI6MjA4MTM5OTU4OH0.zkgwNnMOdsAa4n7LMOsGX-5Nq_zQr2XIW-s6NP1SMHY"
 
 interface UserManagementService {
     @Headers("apikey: $API_KEY")
@@ -59,4 +59,36 @@ interface UserManagementService {
     @Headers("apikey: $API_KEY")
     @PUT("auth/v1/user")
     suspend fun updateUser(@Body request: UpdatePasswordRequest): Response<Unit>
+
+    @Headers("apikey: $API_KEY")
+    @POST("auth/v1/verify")
+    suspend fun verifyOtp(@Body request: VerifyOtpRequest): Response<VerifyOtpResponse>
+
+    @Headers("apikey: $API_KEY")
+    @POST("auth/v1/otp")
+    suspend fun resendOtp(@Body request: ResendOtpRequest): Response<Unit>
 }
+
+// Добавьте модели:
+data class VerifyOtpRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("token") val token: String,
+    @SerializedName("type") val type: String = "signup" // или "magiclink" или "recovery"
+)
+
+data class VerifyOtpResponse(
+    @SerializedName("access_token") val accessToken: String?,
+    @SerializedName("refresh_token") val refreshToken: String?,
+    @SerializedName("user") val user: User?
+)
+
+data class ResendOtpRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("type") val type: String = "signup"
+)
+
+data class User(
+    @SerializedName("id") val id: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("confirmed_at") val confirmedAt: String?
+)

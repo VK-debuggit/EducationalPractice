@@ -1,0 +1,21 @@
+package com.example.educationalpractice.utils
+
+import android.content.Context
+import android.content.SharedPreferences
+
+class OnboardingManager(context: Context) {
+    private val sharedPreferences: SharedPreferences =
+        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+
+    private val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+
+    fun isOnboardingCompleted(): Boolean {
+        return sharedPreferences.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+    }
+
+    fun setOnboardingCompleted() {
+        sharedPreferences.edit()
+            .putBoolean(KEY_ONBOARDING_COMPLETED, true)
+            .apply()
+    }
+}

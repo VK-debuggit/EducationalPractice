@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.example.educationalpractice.Data.Components.ProductCard
 import com.example.educationalpractice.Data.Models.ProductItem
 import com.example.educationalpractice.R
+import com.example.educationalpractice.navigation.NavigationManager
+import com.example.educationalpractice.navigation.Views
 import com.example.educationalpractice.ui.theme.Accent
 import com.example.educationalpractice.ui.theme.Background
 import com.example.educationalpractice.ui.theme.Block
@@ -42,6 +44,7 @@ import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
 import com.example.educationalpractice.ui.theme.Hint
 import com.example.educationalpractice.ui.theme.Text
 import com.example.educationalpractice.ui.theme.Typography
+import com.yourpackage.ui.components.BottomNavigationComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +85,6 @@ fun HomeScreen(modifier: Modifier) {
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Заголовок
                         Text(
                             text = stringResource(R.string.Explore),
                             style = Typography.displayMedium,
@@ -96,7 +98,33 @@ fun HomeScreen(modifier: Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationExactLikePicture()
+            BottomNavigationComponent(
+                homeIcon = R.drawable.home,
+                favoriteIcon = R.drawable.favorite,
+                bagIcon = R.drawable.bag_2,
+                ordersIcon = R.drawable.orders,
+                profileIcon = R.drawable.profile,
+                initialSelectedItem = R.drawable.home, // Начальный выбранный элемент
+                onItemSelected = { selectedIcon ->
+                    when (selectedIcon) {
+                        R.drawable.home -> {
+                            NavigationManager.navigateTo(Views.Home.route)
+                        }
+                        R.drawable.favorite -> {
+                            // Переход в избранное
+                        }
+                        R.drawable.bag_2 -> {
+                            // Переход в корзину
+                        }
+                        R.drawable.orders -> {
+                            // Переход к заказам
+                        }
+                        R.drawable.profile -> {
+                            NavigationManager.navigateTo(Views.Profile.route)
+                        }
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Box(
@@ -364,7 +392,7 @@ fun BottomNavigationExactLikePicture() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp) // УВЕЛИЧИВАЕМ высоту
+            .height(100.dp) // УВЕЛИЧИВАЕМ высоту
             .background(Color.White) // ← ДОБАВЛЕНО: белый фон для всего Box
     ) {
         // 1. СОЗДАЕМ КАСТОМНУЮ ФОРМУ С ВЫГНУТЫМ ВЕРХОМ
@@ -382,8 +410,8 @@ fun BottomNavigationExactLikePicture() {
             val width = size.width
             val height = size.height
             val curveHeight = 25.dp.toPx()
-            val centerButtonWidth = 70.dp.toPx()
-            val centerNotchDepth = 50.dp.toPx()
+            val centerButtonWidth = 80.dp.toPx()
+            val centerNotchDepth = 70.dp.toPx()
 
             val path = Path().apply {
                 moveTo(0f, height)
@@ -451,9 +479,9 @@ fun BottomNavigationExactLikePicture() {
             modifier = Modifier
                 .size(75.dp) // Увеличиваем размер
                 .align(Alignment.TopCenter)
-                .offset(y = 35.dp) // Поднимаем выше
+                .offset(y = -20.dp) // Поднимаем выше
                 .shadow(
-                    elevation = 25.dp, // Усиливаем тень
+                    elevation = 50.dp, // Усиливаем тень
                     shape = CircleShape,
                     clip = false,
                     ambientColor = Accent.copy(alpha = 0.5f),

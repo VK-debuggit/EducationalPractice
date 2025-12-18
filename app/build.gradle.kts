@@ -54,6 +54,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.retrofit)
     implementation(libs.gson)
+    
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.2.3")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.2.3")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.2.3")
+    implementation("io.ktor:ktor-client-json:2.3.11")
+    implementation("io.ktor:ktor-client-serialization:2.3.11")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.accompanist:accompanist-pager:0.32.0")

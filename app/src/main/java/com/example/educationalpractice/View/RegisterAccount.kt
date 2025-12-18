@@ -255,12 +255,55 @@ fun RegisterAccount() {
 
         Spacer(Modifier.height(24.dp))
 
+//                CustomButton(
+//                    onClick = {
+//                        // Валидация полей
+//                        if (email.isBlank() || password.isBlank() || name.isBlank()) {
+//                            showErrorDialog = true
+//                            errorTitle = "Ошибка заполнения"
+//                            errorMessage = "Пожалуйста, заполните все поля"
+//                        } else if (!isAgreed) {
+//                            showErrorDialog = true
+//                            errorTitle = "Ошибка"
+//                            errorMessage = "Необходимо согласиться с условиями"
+//                        } else if (password.length < 6) {
+//                            showErrorDialog = true
+//                            errorTitle = "Ошибка"
+//                            errorMessage = "Пароль должен содержать не менее 6 символов"
+//                        } else if (!email.contains("@") || !email.contains(".")) {
+//                            showErrorDialog = true
+//                            errorTitle = "Ошибка"
+//                            errorMessage = "Введите корректный email адрес"
+//                        } else {
+//                            // Вызов метода регистрации
+//                            viewModel.signUp(
+//                                email = email,
+//                                password = password,
+//                                context = context,
+//                                onSuccess = { email ->
+//                                    // После успешной регистрации переходим на верификацию
+//                                    NavigationManager.navigateTo(Views.Verification.route)
+//                                },
+//                                onError = { error ->
+//                                    showErrorDialog = true
+//                                    errorTitle = "Ошибка регистрации"
+//                                    errorMessage = error
+//                                }
+//                            )
+//                        }
+//                    },
+//                    text = stringResource(R.string.Sign),
+//                    enabled = !viewModel.isLoading && isAgreed && email.isNotBlank() &&
+//                            password.isNotBlank() && name.isNotBlank(),
+//                    cornerRadius = 14,
+//                    modifier = Modifier.fillMaxWidth()
+//                )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            if (viewModel.isLoading) {
+            if (viewModel.isLoading) { // Убрали .value
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(24.dp)
@@ -289,12 +332,13 @@ fun RegisterAccount() {
                             errorTitle = "Ошибка"
                             errorMessage = "Введите корректный email адрес"
                         } else {
-                            // Вызов метода регистрации
+                            // Вызываем метод регистрации с созданием профиля
                             viewModel.signUp(
                                 email = email,
                                 password = password,
+                                firstName = name,
                                 context = context,
-                                onSuccess = { email ->
+                                onSuccess = { userId ->
                                     // После успешной регистрации переходим на верификацию
                                     NavigationManager.navigateTo(Views.Verification.route)
                                 },
@@ -307,7 +351,7 @@ fun RegisterAccount() {
                         }
                     },
                     text = stringResource(R.string.Sign),
-                    enabled = !viewModel.isLoading && isAgreed && email.isNotBlank() &&
+                    enabled = !viewModel.isLoading && isAgreed && email.isNotBlank() && // Убрали .value
                             password.isNotBlank() && name.isNotBlank(),
                     cornerRadius = 14,
                     modifier = Modifier.fillMaxWidth()
@@ -347,6 +391,7 @@ fun RegisterAccount() {
     if (showErrorDialog) {
         CustomAlertDialog(
             onDismissRequest = { showErrorDialog = false },
+            dismissButtonText = "Отмена",
             dialogTitle = errorTitle,
             dialogText = errorMessage,
             iconResId = null,

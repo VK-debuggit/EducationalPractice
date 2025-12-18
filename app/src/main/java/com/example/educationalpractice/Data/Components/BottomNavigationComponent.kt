@@ -1,7 +1,10 @@
-// BottomNavigationComponent.kt
+// BottomNavigationComponent.kt (адаптированный из HomeScreen)
 package com.yourpackage.ui.components
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,24 +29,26 @@ fun BottomNavigationComponent(
     bagIcon: Int,
     ordersIcon: Int,
     profileIcon: Int,
-    onItemSelected: (Int) -> Unit = {}
+    onItemSelected: (Int) -> Unit = {},
+    initialSelectedItem: Int = homeIcon // Добавляем параметр для начального выбора
 ) {
     val menuItems = listOf(homeIcon, favoriteIcon, bagIcon, ordersIcon, profileIcon)
-    val selectedItem = remember { mutableStateOf(homeIcon) }
+    val selectedItem = remember { mutableStateOf(initialSelectedItem) }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
+            .height(100.dp) // Изменено с 110 на 100 как в HomeScreen
             .background(Color.White)
     ) {
+        // 1. СОЗДАЕМ КАСТОМНУЮ ФОРМУ С ВЫГНУТЫМ ВЕРХОМ
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
                 .align(Alignment.BottomStart)
                 .shadow(
-                    elevation = 25.dp,
+                    elevation = 25.dp, // Увеличиваем тень
                     shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
                     clip = true
                 )
@@ -51,8 +56,8 @@ fun BottomNavigationComponent(
             val width = size.width
             val height = size.height
             val curveHeight = 25.dp.toPx()
-            val centerButtonWidth = 70.dp.toPx()
-            val centerNotchDepth = 50.dp.toPx()
+            val centerButtonWidth = 80.dp.toPx() // Увеличено с 70
+            val centerNotchDepth = 70.dp.toPx() // Увеличено с 50
 
             val path = Path().apply {
                 moveTo(0f, height)
@@ -68,10 +73,22 @@ fun BottomNavigationComponent(
                 close()
             }
 
-            drawPath(path = path, color = Color.White, style = Fill)
-            drawPath(path = path, color = Color.White, style = Stroke(width = 1.dp.toPx()))
+            // Рисуем белую заливку
+            drawPath(
+                path = path,
+                color = Color.White,
+                style = Fill
+            )
+
+            // Убираем обводку или делаем её белой
+            drawPath(
+                path = path,
+                color = Color.White,
+                style = Stroke(width = 1.dp.toPx())
+            )
         }
 
+        // 2. РАСПОЛАГАЕМ ИКОНКИ НА ПАНЕЛИ
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,6 +98,7 @@ fun BottomNavigationComponent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Первые 2 иконки (Home, Favorite)
             menuItems.take(2).forEach { iconResId ->
                 MenuIconItemCurved(
                     iconResId = iconResId,
@@ -92,8 +110,10 @@ fun BottomNavigationComponent(
                 )
             }
 
+            // Пустое место для центральной кнопки
             Spacer(modifier = Modifier.width(80.dp))
 
+            // Последние 2 иконки (Orders, Profile)
             menuItems.drop(3).forEach { iconResId ->
                 MenuIconItemCurved(
                     iconResId = iconResId,
@@ -106,13 +126,14 @@ fun BottomNavigationComponent(
             }
         }
 
+        // 3. ЦЕНТРАЛЬНАЯ КНОПКА В ПРОВАЛЕ (БОЛЬШЕ И ВЫШЕ)
         Box(
             modifier = Modifier
-                .size(75.dp)
+                .size(75.dp) // Увеличиваем размер
                 .align(Alignment.TopCenter)
-                .offset(y = 35.dp)
+                .offset(y = -20.dp) // Поднимаем выше (изменено с 35 на -20)
                 .shadow(
-                    elevation = 25.dp,
+                    elevation = 50.dp, // Усиливаем тень (изменено с 25 на 50)
                     shape = CircleShape,
                     clip = false,
                     ambientColor = Accent.copy(alpha = 0.5f),
@@ -129,7 +150,7 @@ fun BottomNavigationComponent(
             Image(
                 painter = painterResource(id = bagIcon),
                 contentDescription = "Заказы",
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(36.dp), // Увеличиваем иконку
                 colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
             )
         }

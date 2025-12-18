@@ -10,7 +10,7 @@
     <string name="email">Email Address</string>
     <string name="password">Password</string>
     <string name="start">Start</string>
-    <string name="next">next</string>
+    <string name="next">Next</string>
     <string name="Register">Register Account</string>
     <string name="Your">Your Name</string>
     <string name="Agree">I agree to the processing of personal data</string>
@@ -47,7 +47,7 @@
     <string name="Checkout">Checkout</string>
     <string name="Contact">Contact Information</string>
     <string name="Address">Address</string>
-    <string name="phone">phone number</string>
+    <string name="phone">Phone number</string>
     <string name="Payment">Payment Method</string>
     <string name="min">min ago</string>
     <string name="OPEN">OPEN</string>
