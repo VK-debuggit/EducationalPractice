@@ -29,9 +29,10 @@ interface UserManagementService {
         @Body body: Map<String, String>
     ): Response<Unit>
 
+    // Исправляем: добавляем префикс eq. для фильтрации
     @GET("rest/v1/profiles")
     suspend fun getProfile(
-        @Query("user_id") userIdQuery: String,
+        @Query("user_id") userIdQuery: String, // Будет передаваться как user_id=eq.{userId}
         @Header("Authorization") token: String
     ): Response<List<UserProfile>>
 
@@ -42,16 +43,18 @@ interface UserManagementService {
         @Header("Prefer") prefer: String = "return=minimal"
     ): Response<Unit>
 
+    // Исправляем: для PATCH также нужен префикс eq.
     @PATCH("rest/v1/profiles")
     suspend fun updateProfile(
-        @Query("user_id") userIdQuery: String,
+        @Query("user_id") userIdQuery: String, // user_id=eq.{userId}
         @Body profile: Map<String, String?>,
         @Header("Authorization") token: String
     ): Response<Unit>
 
+    // Исправляем: для DELETE также нужен префикс eq.
     @DELETE("rest/v1/profiles")
     suspend fun deleteProfile(
-        @Query("user_id") userId: String,
+        @Query("user_id") userId: String, // user_id=eq.{userId}
         @Header("Authorization") token: String
     ): Response<Unit>
 
@@ -60,12 +63,12 @@ interface UserManagementService {
 
     @GET("rest/v1/products")
     suspend fun getProductById(
-        @Query("id") idFilter: String
+        @Query("id") idFilter: String // id=eq.{id}
     ): Response<List<ProductDto>>
 
     @GET("rest/v1/favourite")
     suspend fun getFavouriteForUser(
-        @Query("user_id") userFilter: String
+        @Query("user_id") userFilter: String // user_id=eq.{userId}
     ): Response<List<FavouriteDto>>
 
     @POST("rest/v1/favourite")
@@ -76,20 +79,7 @@ interface UserManagementService {
 
     @DELETE("rest/v1/favourite")
     suspend fun removeFromFavourite(
-        @Query("user_id") userFilter: String,
-        @Query("product_id") productFilter: String
+        @Query("user_id") userFilter: String, // user_id=eq.{userId}
+        @Query("product_id") productFilter: String // product_id=eq.{productId}
     ): Response<Unit>
-
-    // В UserManagementService добавьте:
-    @GET("auth/v1/user")
-    suspend fun getUserInfo(
-        @Header("Authorization") token: String
-    ): Response<UserInfo>
-
-    // И модель:
-    data class UserInfo(
-        val id: String,
-        val email: String,
-        val phone: String? = null
-    )
 }

@@ -12,9 +12,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.educationalpractice.Data.Screens.HomeScreen
 import com.example.educationalpractice.View.*
+import com.example.educationalpractice.ui.screens.ProfileFormScreen
 import com.example.educationalpractice.ui.theme.Background
 import com.example.educationalpractice.utils.OnboardingManager
-import com.yourpackage.ui.screens.ProfileFormScreen
 
 object NavigationManager {
     private var navController: NavHostController? = null

@@ -81,8 +81,11 @@ class ProfileRepository {
                 Log.d("ProfileRepository", "Получение профиля для user_id: $userId")
                 Log.d("ProfileRepository", "Используемый токен: ${token.take(20)}...")
 
+                // Исправляем: добавляем префикс eq. для Supabase
+                val formattedUserId = "eq.$userId"
+
                 val response = RetrofitInstance.userManagementService.getProfile(
-                    userIdQuery = userId,
+                    userIdQuery = formattedUserId,
                     token = "Bearer $token"
                 )
 
@@ -147,8 +150,11 @@ class ProfileRepository {
                 Log.d("ProfileRepository", "Обновление профиля для user_id: $userId с данными: $updateData")
                 Log.d("ProfileRepository", "Используемый токен: ${token.take(20)}...")
 
+                // Исправляем: добавляем префикс eq. для Supabase
+                val formattedUserId = "eq.$userId"
+
                 val response = RetrofitInstance.userManagementService.updateProfile(
-                    userIdQuery = userId,
+                    userIdQuery = formattedUserId,
                     profile = updateData,
                     token = "Bearer $token"
                 )
@@ -184,8 +190,11 @@ class ProfileRepository {
                 Log.d("ProfileRepository", "Удаление профиля для user_id: $userId")
                 Log.d("ProfileRepository", "Используемый токен: ${token.take(20)}...")
 
+                // Исправляем: добавляем префикс eq. для Supabase
+                val formattedUserId = "eq.$userId"
+
                 val response = RetrofitInstance.userManagementService.deleteProfile(
-                    userId = userId,
+                    userId = formattedUserId,
                     token = "Bearer $token"
                 )
 
@@ -206,4 +215,39 @@ class ProfileRepository {
             }
         }
     }
+
+    suspend fun checkProfileExists(userId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val token = TokenStorage.accessToken
+                if (token == null) {
+                    Log.e("ProfileRepository", "Токен не найден")
+                    return@withContext false
+                }
+
+                val formattedUserId = "eq.$userId"
+                val response = RetrofitInstance.userManagementService.getProfile(
+                    userIdQuery = formattedUserId,
+                    token = "Bearer $token"
+                )
+
+                response.isSuccessful && !response.body().isNullOrEmpty()
+            } catch (e: Exception) {
+                Log.e("ProfileRepository", "Ошибка проверки профиля", e)
+                false
+            }
+        }
+    }
 }
+
+// Data класс для профиля
+data class Profile(
+    val id: String? = null,
+    val user_id: String? = null,
+    val firstname: String? = null,
+    val lastname: String? = null,
+    val address: String? = null,
+    val phone: String? = null,
+    val photo: String? = null, // Base64 строка
+    val created_at: String? = null
+)

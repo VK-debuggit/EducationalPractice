@@ -2,6 +2,7 @@ package com.example.educationalpractice.ui.theme.ViewModel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,70 +33,93 @@ class ProfileViewModel : ViewModel() {
         isLoading = true
         viewModelScope.launch {
             try {
+                Log.d("ProfileViewModel", "Загрузка профиля для user_id: $userId")
                 val profile = profileRepository.getProfile(userId)
+
                 if (profile != null) {
                     name = profile.firstname ?: ""
                     lastName = profile.lastname ?: ""
                     address = profile.address ?: ""
                     phone = profile.phone ?: ""
-                    // TODO: Обработка photo URL
+                    Log.d("ProfileViewModel", "Профиль загружен: name='$name', lastname='$lastName'")
                 } else {
-                    // Если профиля нет, создаем пустой
-                    createEmptyProfile(userId)
+                    Log.d("ProfileViewModel", "Профиль не найден, оставляем поля пустыми")
+                    // Не сбрасываем поля, чтобы пользователь видел текущие значения
                 }
             } catch (e: Exception) {
-                errorMessage = "Ошибка загрузки профиля: ${e.message}"
+                Log.e("ProfileViewModel", "Ошибка загрузки профиля", e)
+                errorMessage = "Ошибка загрузки профиля"
             } finally {
                 isLoading = false
             }
         }
     }
 
-    fun saveProfile(context: Context) {
+    fun saveProfile(context: Context): Boolean {
         val userId = getUserIdFromSharedPreferences(context)
         if (userId.isNullOrEmpty()) {
             errorMessage = "Пользователь не найден"
-            return
+            return false
         }
 
         isLoading = true
+        var success = false
+
         viewModelScope.launch {
             try {
-                val success = profileRepository.updateProfile(
-                    userId = userId,
-                    firstname = name,
-                    lastname = lastName,
-                    address = address,
-                    phone = phone
-                    // TODO: Добавить загрузку фото
-                )
+                Log.d("ProfileViewModel", "Сохранение профиля для user_id: $userId")
+                Log.d("ProfileViewModel", "Данные: name='$name', lastname='$lastName', phone='$phone'")
 
-                if (success) {
-                    errorMessage = "" // Очищаем ошибку при успешном сохранении
+                // Сначала проверяем, есть ли профиль
+                val existingProfile = profileRepository.getProfile(userId)
+
+                if (existingProfile == null) {
+                    // Профиля нет - создаем новый
+                    success = profileRepository.createProfile(
+                        userId = userId,
+                        firstname = name,
+                        lastname = lastName,
+                        address = address,
+                        phone = phone
+                    )
+                    Log.d("ProfileViewModel", "Создан новый профиль: $success")
                 } else {
+                    // Профиль есть - обновляем существующий
+                    success = profileRepository.updateProfile(
+                        userId = userId,
+                        firstname = name,
+                        lastname = lastName,
+                        address = address,
+                        phone = phone
+                    )
+                    Log.d("ProfileViewModel", "Обновлен существующий профиль: $success")
+                }
+
+                if (!success) {
                     errorMessage = "Не удалось сохранить профиль"
+                } else {
+                    errorMessage = "" // Очищаем ошибку при успехе
+                    // Перезагружаем профиль после сохранения
+                    loadProfile(context)
                 }
             } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Ошибка сохранения профиля", e)
                 errorMessage = "Ошибка сохранения: ${e.message}"
+                success = false
             } finally {
                 isLoading = false
             }
         }
+
+        return success
     }
 
-    private fun createEmptyProfile(userId: String) {
-        viewModelScope.launch {
-            try {
-                profileRepository.createProfile(
-                    userId = userId,
-                    firstname = name,
-                    lastname = lastName,
-                    address = address,
-                    phone = phone
-                )
-            } catch (e: Exception) {
-                errorMessage = "Ошибка создания профиля: ${e.message}"
-            }
+    fun getFullName(): String {
+        return when {
+            name.isNotEmpty() && lastName.isNotEmpty() -> "$name $lastName"
+            name.isNotEmpty() -> name
+            lastName.isNotEmpty() -> lastName
+            else -> "Добавьте имя"
         }
     }
 

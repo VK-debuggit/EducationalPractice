@@ -22,7 +22,7 @@ object RetrofitInstance {
         OkHttpClient.Builder()
             .apply {
                 // Настройка прокси
-                proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress("10.207.106.71", 3128)))
+                //proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress("10.207.106.71", 3128)))
 
                 // Включаем небезопасный SSL для работы через прокси
                 val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {

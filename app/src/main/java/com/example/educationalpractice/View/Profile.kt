@@ -1,5 +1,4 @@
-// ProfileFormScreen.kt (обновленный с новым меню)
-package com.yourpackage.ui.screens
+package com.example.educationalpractice.ui.screens
 
 import android.Manifest
 import android.content.Context
@@ -36,12 +35,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.educationalpractice.Data.Components.CustomButton
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
 import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.ui.theme.ViewModel.ProfileViewModel
 import com.yourpackage.ui.components.BottomNavigationComponent
+import kotlinx.coroutines.delay
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,59 +52,87 @@ import java.util.*
 @Composable
 fun ProfileFormScreen() {
     val context = LocalContext.current
-    var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var currentPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    val profileViewModel: ProfileViewModel = viewModel()
     var isEditing by remember { mutableStateOf(false) }
+    var showSaveSuccess by remember { mutableStateOf(false) }
+    var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var currentPhotoFile by remember { mutableStateOf<File?>(null) }
 
-    // Изначальные значения
-    var name by remember { mutableStateOf("Emmanuel") }
-    var lastname by remember { mutableStateOf("Oyiboke") }
-    var address by remember { mutableStateOf("Nigeria") }
-    var numberPhone by remember { mutableStateOf("") }
-
-    // Сохраняем оригинальные значения для сравнения
-    val originalName = remember { "Emmanuel" }
-    val originalLastname = remember { "Oyiboke" }
-    val originalAddress = remember { "Nigeria" }
-    val originalNumberPhone = remember { "" }
-    var originalImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    // Проверяем, были ли изменения
-    val hasChanges = remember(name, lastname, address, numberPhone, capturedImageUri) {
-        name != originalName ||
-                lastname != originalLastname ||
-                address != originalAddress ||
-                numberPhone != originalNumberPhone ||
-                capturedImageUri != originalImageUri
+    // Загружаем профиль при первом открытии экрана
+    LaunchedEffect(Unit) {
+        profileViewModel.loadProfile(context)
     }
 
-    // Камера
+    // Launcher для камеры
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success) {
-            capturedImageUri = currentPhotoUri
+        if (success && currentPhotoFile != null) {
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                currentPhotoFile!!
+            )
+            capturedImageUri = uri
+            profileViewModel.photoUri = uri
             Toast.makeText(context, "Фото обновлено", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Фото не сделано", Toast.LENGTH_SHORT).show()
-            capturedImageUri = null
-            currentPhotoUri = null
         }
+        currentPhotoFile = null
     }
 
+    // Launcher для разрешения камеры
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            val photoFile = createImageFile(context)
-            val photoUri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                photoFile)
-            currentPhotoUri = photoUri
-            cameraLauncher.launch(photoUri)
+            currentPhotoFile = createImageFile(context)
+            currentPhotoFile?.let { file ->
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+                cameraLauncher.launch(uri)
+            } ?: run {
+                Toast.makeText(context, "Ошибка создания файла", Toast.LENGTH_SHORT).show()
+            }
         } else {
             Toast.makeText(context, "Нужно разрешение на камеру", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Функция для открытия камеры
+    fun openCamera() {
+        val permissionCheckResult = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        )
+
+        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+            currentPhotoFile = createImageFile(context)
+            currentPhotoFile?.let { file ->
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+                cameraLauncher.launch(uri)
+            } ?: run {
+                Toast.makeText(context, "Ошибка создания файла", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    // Обработка успешного сохранения
+    LaunchedEffect(showSaveSuccess) {
+        if (showSaveSuccess) {
+            delay(2000)
+            showSaveSuccess = false
+            isEditing = false
         }
     }
 
@@ -127,7 +157,6 @@ fun ProfileFormScreen() {
                     containerColor = Color.White
                 ),
                 actions = {
-                    // Кнопка редактирования/сохранения
                     if (!isEditing) {
                         Box(
                             modifier = Modifier
@@ -137,7 +166,6 @@ fun ProfileFormScreen() {
                                     shape = CircleShape
                                 )
                                 .clickable {
-                                    // Включаем режим редактирования
                                     isEditing = true
                                 },
                             contentAlignment = Alignment.Center
@@ -160,24 +188,16 @@ fun ProfileFormScreen() {
                 bagIcon = R.drawable.bag_2,
                 ordersIcon = R.drawable.orders,
                 profileIcon = R.drawable.profile,
-                initialSelectedItem = R.drawable.profile, // Начальный выбранный элемент - профиль
+                initialSelectedItem = R.drawable.profile,
                 onItemSelected = { selectedIcon ->
                     when (selectedIcon) {
                         R.drawable.home -> {
                             NavigationManager.navigateTo(Views.Home.route)
                         }
-                        R.drawable.favorite -> {
-                            // Переход в избранное
-                        }
-                        R.drawable.bag_2 -> {
-                            // Переход в корзину
-                        }
-                        R.drawable.orders -> {
-                            // Переход к заказам
-                        }
-                        R.drawable.profile -> {
-                            // Уже на профиле
-                        }
+                        R.drawable.favorite -> {}
+                        R.drawable.bag_2 -> {}
+                        R.drawable.orders -> {}
+                        R.drawable.profile -> {}
                     }
                 }
             )
@@ -206,73 +226,40 @@ fun ProfileFormScreen() {
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(120.dp)
-                                .clickable(enabled = isEditing) {
-                                    if (isEditing) {
-//                                        checkCameraPermission(context, permissionLauncher)
-                                    }
-                                },
+                                .size(120.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (capturedImageUri != null) {
-                                val bitmapState = remember(capturedImageUri) {
-                                    loadImageBitmap(context, capturedImageUri!!)
-                                }
-                                bitmapState?.let { bitmap ->
+                            // Показываем фото или дефолтное изображение
+                            val imageToShow = capturedImageUri ?: profileViewModel.photoUri
+
+                            if (imageToShow != null) {
+                                val bitmap = loadImageBitmap(context, imageToShow)
+                                bitmap?.let {
                                     Image(
-                                        bitmap = bitmap,
+                                        bitmap = it,
                                         contentDescription = "Фото профиля",
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .clip(CircleShape)
                                     )
                                 } ?: run {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.photoprofile),
-                                        contentDescription = "Ошибка загрузки фото",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(CircleShape)
-                                    )
+                                    DefaultProfileImage()
                                 }
                             } else {
-                                Image(
-                                    painter = painterResource(id = R.drawable.photoprofile),
-                                    contentDescription = "Добавить фото",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(CircleShape)
-                                )
-                            }
-
-                            if (isEditing) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(CircleShape)
-                                        .background(Color.Black.copy(alpha = 0.4f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Сменить фото",
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
+                                DefaultProfileImage()
                             }
                         }
 
-                        // Текст под фото (всегда видимый)
+                        // Имя из таблицы профилей
                         Text(
-                            text = "Emmanuel Oyiboke",
+                            text = profileViewModel.getFullName(),
                             style = Typography.headlineSmall,
                             color = Text,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(top = 16.dp)
                         )
 
-                        // Дополнительный текст (появляется при редактировании)
+                        // Текст для смены фото (кликабельный только в режиме редактирования)
                         if (isEditing) {
                             Text(
                                 text = stringResource(R.string.Change),
@@ -280,25 +267,12 @@ fun ProfileFormScreen() {
                                 color = Accent,
                                 modifier = Modifier
                                     .padding(top = 8.dp)
+                                    .clickable {
+                                        openCamera()
+                                    }
                             )
                         }
                     }
-                }
-
-                // Код профиля
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 40.dp, vertical = 20.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.frameprofile),
-                        contentDescription = "Код",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp)
-                    )
                 }
 
                 // Форма с полями
@@ -316,10 +290,10 @@ fun ProfileFormScreen() {
                     )
 
                     ProfileField(
-                        value = name,
-                        onValueChange = { if (isEditing) name = it },
+                        value = profileViewModel.name,
+                        onValueChange = { if (isEditing) profileViewModel.name = it },
                         isEditing = isEditing,
-                        placeholder = "Emmanuel",
+                        placeholder = "Введите имя",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 24.dp)
@@ -334,10 +308,10 @@ fun ProfileFormScreen() {
                     )
 
                     ProfileField(
-                        value = lastname,
-                        onValueChange = { if (isEditing) lastname = it },
+                        value = profileViewModel.lastName,
+                        onValueChange = { if (isEditing) profileViewModel.lastName = it },
                         isEditing = isEditing,
-                        placeholder = "Oyiboke",
+                        placeholder = "Введите фамилию",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 24.dp)
@@ -352,10 +326,10 @@ fun ProfileFormScreen() {
                     )
 
                     ProfileField(
-                        value = address,
-                        onValueChange = { if (isEditing) address = it },
+                        value = profileViewModel.address,
+                        onValueChange = { if (isEditing) profileViewModel.address = it },
                         isEditing = isEditing,
-                        placeholder = "Nigeria",
+                        placeholder = "Введите адрес",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 24.dp)
@@ -370,40 +344,83 @@ fun ProfileFormScreen() {
                     )
 
                     ProfileField(
-                        value = numberPhone,
-                        onValueChange = { if (isEditing) numberPhone = it },
+                        value = profileViewModel.phone,
+                        onValueChange = { if (isEditing) profileViewModel.phone = it },
                         isEditing = isEditing,
-                        placeholder = "+7 811-732-5298",
+                        placeholder = "+7 000-000-0000",
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    // Показать ошибку если есть
+                    if (profileViewModel.errorMessage.isNotEmpty()) {
+                        Text(
+                            text = profileViewModel.errorMessage,
+                            color = Color.Red,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     if (isEditing) {
                         CustomButton(
                             onClick = {
-                                // Сохраняем изменения и выходим из режима редактирования
-                                isEditing = false
-                                Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
-
-                                // Обновляем оригинальные значения
-                                originalImageUri = capturedImageUri
-                                // Здесь можно добавить логику сохранения в базу данных или SharedPreferences
+                                val saved = profileViewModel.saveProfile(context)
+                                if (saved) {
+                                    showSaveSuccess = true
+                                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             text = stringResource(R.string.save),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 24.dp),
-                            enabled = hasChanges, // Кнопка активна только если есть изменения
+                            enabled = !profileViewModel.isLoading,
                             cornerRadius = 12,
                             textStyle = Typography.labelSmall
                         )
                     }
-                    Spacer(modifier = Modifier.height(100.dp)) // Отступ для меню
+
+                    // Показать успех сохранения
+                    if (showSaveSuccess) {
+                        Text(
+                            text = "Данные сохранены!",
+                            color = Color.Green,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(100.dp))
+                }
+            }
+
+            // Показать индикатор загрузки
+            if (profileViewModel.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Accent)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun DefaultProfileImage() {
+    Image(
+        painter = painterResource(id = R.drawable.photoprofile),
+        contentDescription = "Фото профиля",
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(CircleShape)
+    )
 }
 
 @Composable
@@ -421,14 +438,11 @@ fun ProfileField(
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         if (isEditing) {
-            // В режиме редактирования - поле ввода
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = Text
-                ),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = Text),
                 singleLine = true,
                 decorationBox = { innerTextField ->
                     Box(
@@ -447,7 +461,6 @@ fun ProfileField(
                 }
             )
         } else {
-            // В режиме просмотра - просто текст
             Text(
                 text = if (value.isNotEmpty()) value else placeholder,
                 style = MaterialTheme.typography.bodyMedium,
@@ -457,53 +470,13 @@ fun ProfileField(
     }
 }
 
-// Остальные функции остаются без изменений
 fun loadImageBitmap(context: Context, uri: Uri): androidx.compose.ui.graphics.ImageBitmap? {
     return try {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-        bitmap?.asImageBitmap()
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
+        }
     } catch (e: Exception) {
-        e.printStackTrace()
         null
-    }
-}
-
-private fun checkCameraPermission(
-    context: Context,
-    permissionLauncher: ActivityResultLauncher<String>,
-    cameraLauncher: ActivityResultLauncher<Uri>,
-    photoUri: Uri
-) {
-    val hasPermission = ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.CAMERA
-    ) == PackageManager.PERMISSION_GRANTED
-
-    if (hasPermission) {
-        cameraLauncher.launch(photoUri)
-    } else {
-        permissionLauncher.launch(Manifest.permission.CAMERA)
-    }
-}
-
-fun openCamera(
-    context: Context,
-    cameraLauncher: ActivityResultLauncher<Uri>,
-    onUriCreated: (Uri) -> Unit
-) {
-    try {
-        val photoFile = createImageFile(context)
-        val photoUri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            photoFile
-        )
-        onUriCreated(photoUri)
-        cameraLauncher.launch(photoUri)
-    } catch (e: Exception) {
-        Toast.makeText(context, "Ошибка камеры: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 }
 
