@@ -94,9 +94,13 @@ fun ProfileFormScreen() {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            openCamera(context, cameraLauncher) { uri ->
-                currentPhotoUri = uri
-            }
+            val photoFile = createImageFile(context)
+            val photoUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                photoFile)
+            currentPhotoUri = photoUri
+            cameraLauncher.launch(photoUri)
         } else {
             Toast.makeText(context, "Нужно разрешение на камеру", Toast.LENGTH_SHORT).show()
         }
@@ -205,14 +209,7 @@ fun ProfileFormScreen() {
                                 .size(120.dp)
                                 .clickable(enabled = isEditing) {
                                     if (isEditing) {
-                                        val photoFile = createImageFile(context)
-                                        val photoUri = FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.fileprovider",
-                                            photoFile
-                                        )
-                                        currentPhotoUri = photoUri
-                                        checkCameraPermission(context, permissionLauncher, cameraLauncher, photoUri)
+//                                        checkCameraPermission(context, permissionLauncher)
                                     }
                                 },
                             contentAlignment = Alignment.Center
@@ -221,7 +218,6 @@ fun ProfileFormScreen() {
                                 val bitmapState = remember(capturedImageUri) {
                                     loadImageBitmap(context, capturedImageUri!!)
                                 }
-
                                 bitmapState?.let { bitmap ->
                                     Image(
                                         bitmap = bitmap,

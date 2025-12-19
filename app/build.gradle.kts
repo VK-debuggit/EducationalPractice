@@ -54,6 +54,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.retrofit)
     implementation(libs.gson)
+
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.2.3")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.2.3")

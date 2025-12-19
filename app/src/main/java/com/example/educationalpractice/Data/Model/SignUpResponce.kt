@@ -10,15 +10,8 @@ package com.example.educationalpractice.Data.Model
 import com.google.gson.annotations.SerializedName
 
 data class SignUpResponse(
-    @SerializedName("id") val id: String? = null,
-    @SerializedName("user") val user: User? = null,
-    @SerializedName("access_token") val accessToken: String? = null,
-    @SerializedName("refresh_token") val refreshToken: String? = null
-)
-
-data class User(
-    @SerializedName("id") val id: String? = null,
-    @SerializedName("email") val email: String? = null,
-    @SerializedName("created_at") val createdAt: String? = null,
-    @SerializedName("confirmed_at") val confirmedAt: String? = null
+    val id: String,
+    val email: String? = null,
+    val created_at: String? = null,
+    val confirmed_at: String? = null
 )

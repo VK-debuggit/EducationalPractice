@@ -10,7 +10,18 @@ import com.google.gson.annotations.SerializedName
 //    @SerializedName("user") val user: User? = null
 //)
 
+//data class VerifyResponse(
+//    val access_token: String? = null,
+//    val user: Any? = null
+//)
+
 data class VerifyResponse(
-    val access_token: String? = null,
-    val user: Any? = null
+    val user: VerifyUser? = null,
+    val message: String? = null
+)
+
+data class VerifyUser(
+    val id: String? = null,
+    val email: String? = null,
+    val confirmed_at: String? = null
 )

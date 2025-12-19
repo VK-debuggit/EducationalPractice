@@ -170,12 +170,6 @@ fun SignIn() {
             } else {
                 PasswordVisualTransformation()
             },
-            placeholder = {
-                Text(
-                    "Введите пароль",
-                    style = MaterialTheme.typography.bodySmall // Body Regular 16
-                )
-            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -300,6 +294,7 @@ fun SignIn() {
     if (showSuccessDialog) {
         CustomAlertDialog(
             onDismissRequest = { showSuccessDialog = false },
+            dismissButtonText = "Отмена",
             dialogTitle = "Успешно!",
             dialogText = "Авторизация прошла успешно!",
             iconResId = R.drawable.favorite_fill, // Добавьте иконку успеха если есть
