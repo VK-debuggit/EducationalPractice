@@ -333,18 +333,32 @@ fun RegisterAccount() {
                             errorMessage = "Введите корректный email адрес"
                         } else {
                             // Вызываем метод регистрации с созданием профиля
+//                            viewModel.signUp(
+//                                email = email,
+//                                password = password,
+//                                firstName = name,
+//                                context = context,
+//                                onSuccess = { userId ->
+//                                    // После успешной регистрации переходим на верификацию
+//                                    NavigationManager.navigateTo(Views.Verification.route)
+//                                },
+//                                onError = { error ->
+//                                    showErrorDialog = true
+//                                    errorTitle = "Ошибка регистрации"
+//                                    errorMessage = error
+//                                }
+//                            )
                             viewModel.signUp(
                                 email = email,
                                 password = password,
                                 firstName = name,
                                 context = context,
-                                onSuccess = { userId ->
-                                    // После успешной регистрации переходим на верификацию
+                                onSuccess = { email ->
+                                    // Переходим на OTP экран
                                     NavigationManager.navigateTo(Views.Verification.route)
                                 },
                                 onError = { error ->
                                     showErrorDialog = true
-                                    errorTitle = "Ошибка регистрации"
                                     errorMessage = error
                                 }
                             )

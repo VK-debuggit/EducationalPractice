@@ -1,5 +1,7 @@
 package com.example.educationalpractice.View
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,11 +51,11 @@ fun Verification() {
     val viewModel: SignUpViewModel = viewModel()
     val context = LocalContext.current
 
-    // Получаем email
+    // Получаем email из ViewModel
     var savedEmail by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        savedEmail = viewModel.getEmailFromPrefs(context)
+        savedEmail = viewModel.getEmailForVerification(context)
     }
 
     // Запускаем таймер только если он активен
@@ -79,11 +81,25 @@ fun Verification() {
             return
         }
 
+//        viewModel.verifyCode(
+//            code = otpCode,
+//            context = context,
+//            onSuccess = {
+//                NavigationManager.navigateTo(Views.SignIn.route)
+//            },
+//            onError = { error ->
+//                errorMessage = error
+//                showErrorDialog = true
+//            }
+//        )
+
         viewModel.verifyCode(
             code = otpCode,
             context = context,
-            onSuccess = {
-                NavigationManager.navigateTo(Views.SignIn.route)
+            onSuccess = { userId ->
+                // Профиль создан, переходим на главный
+                Log.d("APP", "✅ Профиль создан, userId: $userId")
+                NavigationManager.navigateTo(Views.Home.route)
             },
             onError = { error ->
                 errorMessage = error

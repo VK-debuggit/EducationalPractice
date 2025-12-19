@@ -243,7 +243,8 @@ fun SignIn() {
                                     showErrorDialog = true
                                     errorTitle = "Ошибка авторизации"
                                     errorMessage = error
-                                }
+                                },
+                                context = context
                             )
                         }
                     },

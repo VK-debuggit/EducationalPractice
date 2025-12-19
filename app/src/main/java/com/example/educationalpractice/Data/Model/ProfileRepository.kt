@@ -1,10 +1,9 @@
 // ProfileRepository.kt
 package com.example.educationalpractice.data.repository
 
+import com.example.educationalpractice.Data.Model.ProfileResponse
+import com.example.educationalpractice.Data.Model.ProfileUpdateRequest
 import com.example.educationalpractice.Data.Service.RetrofitInstance
-import com.example.educationalpractice.data.service.ProfileCreateRequest
-import com.example.educationalpractice.data.service.ProfileResponse
-import com.example.educationalpractice.data.service.ProfileUpdateRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -15,22 +14,28 @@ class ProfileRepository {
     suspend fun createProfile(
         userId: String,
         firstName: String,
-        email: String? = null // опциональный параметр
+        email: String? = null
     ): Result<Unit> {
         return try {
-            val profile = ProfileCreateRequest(
-                id = UUID.randomUUID().toString(),
-                user_id = userId,
-                firstname = firstName,
-                lastname = null,
-                address = null,
-                phone = null,
-                photo = null
+            // Создаем Map вместо ProfileCreateRequest
+            val params = mutableMapOf<String, Any>(
+                "id" to UUID.randomUUID().toString(),
+                "user_id" to userId,  // Обрати внимание на имя поля!
+                "firstname" to firstName
             )
 
+            // Добавляем email, если он есть
+            if (email != null) {
+                params["email"] = email
+            }
+
             withContext(Dispatchers.IO) {
-                profileService.createProfile(profile)
-                Result.success(Unit)
+                val response = profileService.createProfile(params)
+                if (response.isSuccessful) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception("Failed to create profile: ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -42,9 +47,14 @@ class ProfileRepository {
     suspend fun getProfileByUserId(userId: String): Result<List<ProfileResponse>> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                profileService.getProfileByUserId(userId)
+                RetrofitInstance.profileService.getProfileByUserId(userId)
             }
-            Result.success(response)
+
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: emptyList())
+            } else {
+                Result.failure(Exception("Failed to get profile: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
