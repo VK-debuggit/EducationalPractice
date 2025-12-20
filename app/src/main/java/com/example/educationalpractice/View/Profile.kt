@@ -194,10 +194,14 @@ fun ProfileFormScreen() {
                         R.drawable.home -> {
                             NavigationManager.navigateTo(Views.Home.route)
                         }
-                        R.drawable.favorite -> {}
+                        R.drawable.favorite -> {
+                            NavigationManager.navigateTo(Views.Favorite.route)
+                        }
                         R.drawable.bag_2 -> {}
                         R.drawable.orders -> {}
-                        R.drawable.profile -> {}
+                        R.drawable.profile -> {
+                            NavigationManager.navigateTo(Views.Profile.route)
+                        }
                     }
                 }
             )
@@ -362,15 +366,18 @@ fun ProfileFormScreen() {
 
                     Spacer(modifier = Modifier.weight(1f))
 
+                    // В ProfileFormScreen измените сохранение:
                     if (isEditing) {
                         CustomButton(
                             onClick = {
                                 val saved = profileViewModel.saveProfile(context)
-                                if (saved) {
+                                if (profileViewModel.saveSuccess) { // Проверяем saveSuccess вместо saved
                                     showSaveSuccess = true
                                     Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                                    // После успешного сохранения выходим из режима редактирования
+                                    isEditing = false
+                                } else if (profileViewModel.errorMessage.isNotEmpty()) {
+                                    Toast.makeText(context, profileViewModel.errorMessage, Toast.LENGTH_SHORT).show()
                                 }
                             },
                             text = stringResource(R.string.save),

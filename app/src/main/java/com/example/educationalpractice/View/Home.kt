@@ -1,6 +1,8 @@
+// Data/Screens/HomeScreen.kt
 package com.example.educationalpractice.Data.Screens
 
-import androidx.compose.foundation.Canvas
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,69 +14,92 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.educationalpractice.Category
 import com.example.educationalpractice.Data.Components.ProductCard
+import com.example.educationalpractice.Data.Models.Product
 import com.example.educationalpractice.Data.Models.ProductItem
+import com.example.educationalpractice.Data.Repository.CategoryRepository
+import com.example.educationalpractice.Data.Repository.FavoriteRepository
+import com.example.educationalpractice.Data.Repository.ProductRepository
+import com.example.educationalpractice.Data.SupabaseClient
 import com.example.educationalpractice.R
 import com.example.educationalpractice.navigation.NavigationManager
 import com.example.educationalpractice.navigation.Views
-import com.example.educationalpractice.ui.theme.Accent
-import com.example.educationalpractice.ui.theme.Background
-import com.example.educationalpractice.ui.theme.Block
-import com.example.educationalpractice.ui.theme.EducationalPracticeTheme
-import com.example.educationalpractice.ui.theme.Hint
-import com.example.educationalpractice.ui.theme.Text
-import com.example.educationalpractice.ui.theme.Typography
+import com.example.educationalpractice.ui.theme.*
+import com.example.educationalpractice.ui.theme.ViewModel.ProfileViewModel
 import com.yourpackage.ui.components.BottomNavigationComponent
+import kotlinx.coroutines.launch
+import java.util.UUID
 
+// HomeScreen.kt - верните старый простой код без избранного для начала:
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier) {
+    // Состояние для категорий и товаров
     val selectedCategory = remember { mutableStateOf("Все") }
-    val categories = listOf(stringResource(R.string.See), "Outdoor", "Tennis", "Men", "Women")
+    val categories = remember { mutableStateOf<List<Category>>(emptyList()) }
+    val bestSellerProducts = remember { mutableStateOf<List<ProductItem>>(emptyList()) }
+    val isLoading = remember { mutableStateOf(true) }
+    val errorMessage = remember { mutableStateOf<String?>(null) }
 
-    val popularProducts = listOf(
-        ProductItem(
-            id = 1,
-            name = "Nike Air Max",
-            price = "P750.00",
-            imageResId = R.drawable.cross,
-            isBestSeller = true
-        ),
-        ProductItem(
-            id = 2,
-            name = "Nike Air Max",
-            price = "P750.00",
-            imageResId = R.drawable.cross,
-            isBestSeller = true
-        ),
-        ProductItem(
-            id = 3,
-            name = "Nike Air Max",
-            price = "P750.00",
-            imageResId = R.drawable.cross,
-            isBestSeller = true
-        ),
-    )
+    // Загружаем данные при старте
+    LaunchedEffect(Unit) {
+        isLoading.value = true
+        errorMessage.value = null
+
+        try {
+            Log.d("HomeScreen", "🚀 Начинаем загрузку данных...")
+
+            // 1. Загружаем категории из БД
+            val categoryRepo = CategoryRepository()
+            val dbCategories: List<Category> = categoryRepo.getAllCategories()
+            Log.d("HomeScreen", "📊 Категорий загружено: ${dbCategories.size}")
+            categories.value = dbCategories
+
+            // 2. Загружаем бестселлеры из БД
+            val productRepo = ProductRepository()
+            val dbBestSellers: List<Product> = productRepo.getBestSellerProducts()
+            Log.d("HomeScreen", "🛒 Бестселлеров загружено: ${dbBestSellers.size}")
+
+            if (dbBestSellers.isNotEmpty()) {
+                bestSellerProducts.value = dbBestSellers.map { product: Product ->
+                    ProductItem(
+                        id = product.id,
+                        name = product.title,
+                        price = "P${"%.2f".format(product.cost)}",
+                        imageResId = R.drawable.cross,
+                        isBestSeller = product.is_best_seller == true
+                    )
+                }
+            } else {
+                Log.d("HomeScreen", "⚠️ Бестселлеры не найдены в БД")
+                bestSellerProducts.value = getTestProducts()
+            }
+
+        } catch (e: Exception) {
+            Log.e("HomeScreen", "❌ Ошибка загрузки данных", e)
+            errorMessage.value = "Ошибка: ${e.message}"
+            bestSellerProducts.value = getTestProducts()
+
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    // Используем bestSellerProducts
+    val popularProducts = bestSellerProducts.value
 
     Scaffold(
         topBar = {
@@ -82,8 +107,7 @@ fun HomeScreen(modifier: Modifier) {
                 title = {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
                             text = stringResource(R.string.Explore),
@@ -104,186 +128,98 @@ fun HomeScreen(modifier: Modifier) {
                 bagIcon = R.drawable.bag_2,
                 ordersIcon = R.drawable.orders,
                 profileIcon = R.drawable.profile,
-                initialSelectedItem = R.drawable.home, // Начальный выбранный элемент
+                initialSelectedItem = R.drawable.home,
                 onItemSelected = { selectedIcon ->
                     when (selectedIcon) {
-                        R.drawable.home -> {
-                            NavigationManager.navigateTo(Views.Home.route)
-                        }
-                        R.drawable.favorite -> {
-                            // Переход в избранное
-                        }
-                        R.drawable.bag_2 -> {
-                            // Переход в корзину
-                        }
-                        R.drawable.orders -> {
-                            // Переход к заказам
-                        }
-                        R.drawable.profile -> {
-                            NavigationManager.navigateTo(Views.Profile.route)
-                        }
+                        R.drawable.home -> NavigationManager.navigateTo(Views.Home.route)
+                        R.drawable.favorite -> NavigationManager.navigateTo(Views.Favorite.route)
+                        R.drawable.bag_2 -> {}
+                        R.drawable.orders -> {}
+                        R.drawable.profile -> NavigationManager.navigateTo(Views.Profile.route)
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .background(Color.White)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .background(Color.White)
-            ) {
-                // Поисковая строка
-                SearchBar(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            // Поисковая строка
+            SearchBar(modifier = Modifier.padding(16.dp))
 
-                // Категории
-                CategoriesSection(
-                    categories = categories,
-                    selectedCategory = selectedCategory.value,
-                    onCategorySelected = { category ->
-                        selectedCategory.value = category
-                    },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
+            // Категории
+            Text(
+                text = stringResource(R.string.Select),
+                style = Typography.headlineSmall,
+                color = Text,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
 
-                // Популярное
-                PopularSection(
-                    products = popularProducts,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-
-                // Акции
-                PromoSection(modifier = Modifier.padding(16.dp))
-
-                // Добавляем отступ снизу, чтобы контент не скрывался под меню
-                Spacer(modifier = Modifier.height(100.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun SearchBar(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(50.dp)
-                .background(
-                    color = Block,
-                    shape = RoundedCornerShape(25.dp)
-                )
-                .clickable {},
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.find),
-                    contentDescription = "Поиск",
-                    modifier = Modifier.size(20.dp)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
+            if (isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Accent)
+                }
+            } else if (errorMessage.value != null) {
                 Text(
-                    text = stringResource(R.string.Looking),
+                    text = errorMessage.value ?: "Ошибка",
+                    color = Color.Red,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                ShowCategories(
+                    categories = categories.value,
+                    selectedCategory = selectedCategory.value,
+                    onCategorySelected = { categoryTitle, categoryId ->
+                        selectedCategory.value = categoryTitle
+                        NavigationManager.navigateTo(Views.Catalog.withCategory(categoryTitle, categoryId))
+                    }
+                )
+            } else if (categories.value.isEmpty()) {
+                Text(
+                    text = "Категории не найдены",
                     color = Hint,
-                    fontSize = 16.sp
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                ShowCategories(
+                    categories = categories.value,
+                    selectedCategory = selectedCategory.value,
+                    onCategorySelected = { categoryTitle, categoryId ->
+                        selectedCategory.value = categoryTitle
+                        NavigationManager.navigateTo(Views.Catalog.withCategory(categoryTitle, categoryId))
+                    }
                 )
             }
-        }
 
-        // Иконка настроек на синем круге
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(
-                    color = Accent,
-                    shape = CircleShape
-                )
-                .clickable {
-                    // Обработчик нажатия на иконку настроек
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.sliders),
-                contentDescription = "Настройки",
-                modifier = Modifier.size(24.dp),
-                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
+            // Популярные товары БЕЗ избранного (простая версия)
+            PopularSectionSimple(
+                products = popularProducts,
+                modifier = Modifier.padding(top = 16.dp)
             )
+
+            // Акции
+            PromoSectionWithImage(modifier = Modifier.padding(16.dp))
+
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
+// Простая версия PopularSection без избранного
 @Composable
-fun CategoriesSection(
-    categories: List<String>,
-    selectedCategory: String,
-    onCategorySelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = stringResource(R.string.Select),
-            style = Typography.headlineSmall,
-            color = Text,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 0.dp)
-        ) {
-            items(categories) { category ->
-                CategoryChip(
-                    text = category,
-                    isSelected = category == selectedCategory,
-                    onClick = { onCategorySelected(category) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CategoryChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                color = if (isSelected) Accent else Color(0xFFF5F5F5)
-            )
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = if (isSelected) Block else Text,
-            fontSize = 14.sp
-        )
-    }
-}
-
-@Composable
-fun PopularSection(
+fun PopularSectionSimple(
     products: List<ProductItem>,
     modifier: Modifier = Modifier
 ) {
@@ -306,24 +242,136 @@ fun PopularSection(
                 style = Typography.displaySmall,
                 color = Accent,
                 modifier = Modifier.clickable {
-                    // Обработчик "Все"
+                    NavigationManager.navigateTo(Views.Catalog.withCategory("Все", null))
                 }
             )
         }
 
         LazyRow(
-            modifier = Modifier.padding(top = 12.dp, start = 16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(products) { product ->
+            items(products, key = { it.id }) { product: ProductItem ->
                 ProductCard(
                     modifier = Modifier.width(160.dp),
                     productImageResId = product.imageResId,
-                    badgeText = "BEST SELLER",
+                    badgeText = if (product.isBestSeller) "BEST SELLER" else "",
                     productName = product.name,
                     productPrice = product.price,
-                    onCardClick = {
-                        // Обработчик клика на товар
+                    isFavorite = false,
+                    onFavoriteClick = {} // Пустая функция пока
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ShowCategories(
+    categories: List<Category>,
+    selectedCategory: String,
+    onCategorySelected: (String, String?) -> Unit
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.padding(bottom = 16.dp)
+    ) {
+        // Сначала добавляем "Все"
+        item {
+            CategoryChip(
+                text = "Все",
+                isSelected = "Все" == selectedCategory,
+                onClick = {
+                    onCategorySelected("Все", null)
+                }
+            )
+        }
+
+        // Потом все остальные категории
+        items(categories) { category ->
+            CategoryChip(
+                text = category.title,
+                isSelected = category.title == selectedCategory,
+                onClick = {
+                    onCategorySelected(category.title, category.id)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                color = if (isSelected) Accent else Color(0xFFF5F5F5)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = if (isSelected) Color.White else Text,
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun PopularSection(
+    products: List<ProductItem>,
+    favoriteProductIds: Set<String>,
+    userId: String,
+    onFavoriteToggle: (String, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.Popular),
+                style = Typography.headlineSmall,
+                color = Text
+            )
+
+            Text(
+                text = stringResource(R.string.See),
+                style = Typography.displaySmall,
+                color = Accent,
+                modifier = Modifier.clickable {
+                    NavigationManager.navigateTo(Views.Catalog.withCategory("Все", null))
+                }
+            )
+        }
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(products, key = { it.id }) { product: ProductItem ->
+                ProductCard(
+                    modifier = Modifier.width(160.dp),
+                    productImageResId = product.imageResId,
+                    badgeText = if (product.isBestSeller) "BEST SELLER" else "",
+                    productName = product.name,
+                    productPrice = product.price,
+                    isFavorite = favoriteProductIds.contains(product.id),
+                    onFavoriteClick = {
+                        val newFavoriteState = !favoriteProductIds.contains(product.id)
+                        onFavoriteToggle(product.id, newFavoriteState)
                     }
                 )
             }
@@ -332,12 +380,10 @@ fun PopularSection(
 }
 
 @Composable
-fun PromoSection(modifier: Modifier = Modifier) {
+fun PromoSectionWithImage(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -351,194 +397,110 @@ fun PromoSection(modifier: Modifier = Modifier) {
                 text = stringResource(R.string.See),
                 style = Typography.displaySmall,
                 color = Accent,
-                modifier = Modifier.clickable {}
+                modifier = Modifier.clickable {
+                    NavigationManager.navigateTo(Views.Catalog.withCategory("Все", null))
+                }
             )
         }
 
-        // Баннер акции
+        // Картинка вместо текста
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
-                .clickable {},
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.frame),
-                    contentDescription = "Реклама",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(3f / 4f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationExactLikePicture() {
-    val menuItems = listOf(
-        R.drawable.home,
-        R.drawable.favorite,
-        R.drawable.bag_2,
-        R.drawable.orders,
-        R.drawable.profile
-    )
-    val selectedItem = remember { mutableStateOf(R.drawable.home) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp) // УВЕЛИЧИВАЕМ высоту
-            .background(Color.White) // ← ДОБАВЛЕНО: белый фон для всего Box
-    ) {
-        // 1. СОЗДАЕМ КАСТОМНУЮ ФОРМУ С ВЫГНУТЫМ ВЕРХОМ
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.BottomStart)
-                .shadow(
-                    elevation = 25.dp, // Увеличиваем тень
-                    shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
-                    clip = true
-                )
-        ) {
-            val width = size.width
-            val height = size.height
-            val curveHeight = 25.dp.toPx()
-            val centerButtonWidth = 80.dp.toPx()
-            val centerNotchDepth = 70.dp.toPx()
-
-            val path = Path().apply {
-                moveTo(0f, height)
-                lineTo(0f, curveHeight)
-                quadraticBezierTo(0f, 0f, width * 0.15f, 0f)
-                lineTo(width * 0.45f - centerButtonWidth / 2f, 0f)
-                lineTo(width * 0.5f - centerButtonWidth / 3f, centerNotchDepth)
-                lineTo(width * 0.5f + centerButtonWidth / 3f, centerNotchDepth)
-                lineTo(width * 0.55f + centerButtonWidth / 2f, 0f)
-                lineTo(width * 0.85f, 0f)
-                quadraticBezierTo(width, 0f, width, curveHeight)
-                lineTo(width, height)
-                close()
-            }
-
-            // Рисуем белую заливку
-            drawPath(
-                path = path,
-                color = Color.White,
-                style = Fill
-            )
-
-            // Убираем обводку или делаем её белой
-            drawPath(
-                path = path,
-                color = Color.White, // Меняем на белый
-                style = Stroke(width = 1.dp.toPx())
-            )
-        }
-
-        // 2. РАСПОЛАГАЕМ ИКОНКИ НА ПАНЕЛИ
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .align(Alignment.BottomStart)
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Первые 2 иконки (Home, Favorite)
-            menuItems.take(2).forEach { iconResId ->
-                MenuIconItemCurved(
-                    iconResId = iconResId,
-                    isSelected = selectedItem.value == iconResId,
-                    onClick = { selectedItem.value = iconResId }
-                )
-            }
-
-            // Пустое место для центральной кнопки
-            Spacer(modifier = Modifier.width(80.dp))
-
-            // Последние 2 иконки (Orders, Profile)
-            menuItems.drop(3).forEach { iconResId ->
-                MenuIconItemCurved(
-                    iconResId = iconResId,
-                    isSelected = selectedItem.value == iconResId,
-                    onClick = { selectedItem.value = iconResId }
-                )
-            }
-        }
-
-        // 3. ЦЕНТРАЛЬНАЯ КНОПКА В ПРОВАЛЕ (БОЛЬШЕ И ВЫШЕ)
-        Box(
-            modifier = Modifier
-                .size(75.dp) // Увеличиваем размер
-                .align(Alignment.TopCenter)
-                .offset(y = -20.dp) // Поднимаем выше
-                .shadow(
-                    elevation = 50.dp, // Усиливаем тень
-                    shape = CircleShape,
-                    clip = false,
-                    ambientColor = Accent.copy(alpha = 0.5f),
-                    spotColor = Accent.copy(alpha = 0.5f)
-                )
-                .clip(CircleShape)
-                .background(Accent)
-                .clickable { selectedItem.value = R.drawable.bag_2 },
+                .height(150.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable {
+                    NavigationManager.navigateTo(Views.Catalog.withCategory("Все", null))
+                },
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.bag_2),
-                contentDescription = "Заказы",
-                modifier = Modifier.size(36.dp), // Увеличиваем иконку
-                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
+                painter = painterResource(id = R.drawable.frame),
+                contentDescription = "Рекламный баннер",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
             )
         }
     }
 }
 
 @Composable
-fun MenuIconItemCurved(
-    iconResId: Int,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .width(65.dp)
-            .height(65.dp)
-            .clickable { onClick() }
+fun SearchBar(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Image(
-            painter = painterResource(id = iconResId),
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
-                if (isSelected) Accent else Hint
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(50.dp)
+                .background(
+                    color = Block,
+                    shape = RoundedCornerShape(25.dp)
+                ),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.find),
+                    contentDescription = "Поиск",
+                    modifier = Modifier.size(20.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = stringResource(R.string.Looking),
+                    color = Hint,
+                    fontSize = 16.sp
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .background(
+                    color = Accent,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.sliders),
+                contentDescription = "Фильтры",
+                modifier = Modifier.size(24.dp)
             )
-        )
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    EducationalPracticeTheme {
-        HomeScreen(Modifier.background(Background))
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun HomeScreenFullPreview() {
-    EducationalPracticeTheme {
-        HomeScreen(Modifier.background(Background))
-    }
-}
+fun getTestProducts(): List<ProductItem> = listOf(
+    ProductItem(
+        id = "1",
+        name = "Nike Air Max",
+        price = "P750.00",
+        imageResId = R.drawable.cross,
+        isBestSeller = true
+    ),
+    ProductItem(
+        id = "2",
+        name = "Nike Air Force",
+        price = "P650.00",
+        imageResId = R.drawable.cross,
+        isBestSeller = true
+    ),
+    ProductItem(
+        id = "3",
+        name = "Adidas Superstar",
+        price = "P800.00",
+        imageResId = R.drawable.cross,
+        isBestSeller = false
+    )
+)

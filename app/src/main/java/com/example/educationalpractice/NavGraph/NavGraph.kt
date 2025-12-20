@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.educationalpractice.Data.Screens.FavoriteScreen
 import com.example.educationalpractice.Data.Screens.HomeScreen
 import com.example.educationalpractice.View.*
 import com.example.educationalpractice.ui.screens.ProfileFormScreen
@@ -29,6 +30,10 @@ object NavigationManager {
 
     fun navigateBack() {
         navController?.popBackStack()
+    }
+
+    fun navigateToCatalog(category: String = "Все") {
+        navigateTo(Views.Catalog.withCategory(category))
     }
 }
 
@@ -57,6 +62,10 @@ fun AppNavigation() {
         composable(Views.Onboard.route) {
             Onboard()
         }
+        composable(route = Views.Catalog.route) { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: "Все"
+            Catalog(navController = navController)
+        }
         composable(Views.OnboardScreen2.route) {
             OnboardScreen2()
         }
@@ -74,6 +83,9 @@ fun AppNavigation() {
         }
         composable(Views.CreateNewPassword.route) {
             CreateNewPassword()
+        }
+        composable(Views.Favorite.route) {
+            FavoriteScreen()
         }
         composable(Views.SignIn.route) {
             SignIn()
@@ -95,7 +107,17 @@ sealed class Views(val route: String) {
     object OnboardScreen3 : Views("onboardscreen3")
     object CreateNewPassword : Views("create_new_password")
     object RegisterAccount : Views("register_account")
-    object SignIn : Views("sign_in")
     object Verification : Views("verification")
     object ForgotPassword : Views("forgot_password")
+    object Catalog : Views("catalog?category={category}") {
+        fun withCategory(category: String, categoryId: String? = null): String {
+            return if (categoryId != null) {
+                "catalog?category=$category&categoryId=$categoryId"
+            } else {
+                "catalog?category=$category"
+            }
+        }
+    }
+    object SignIn : Views("signin")
+    object Favorite : Views("favorite")
 }

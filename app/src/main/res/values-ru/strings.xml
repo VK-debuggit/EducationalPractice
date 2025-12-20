@@ -64,7 +64,7 @@
     <string name="Notifications">Уведомления</string>
     <string name="SETTINGS">Настройки</string>
     <string name="SignOut">Выйти</string>
-    <string name="Profile">профиль</string>
+    <string name="Profile">Профиль</string>
     <string name="Change">Изменить фото профиля</string>
     <string name="YourName">Имя</string>
     <string name="LastName">Фамилия</string>
@@ -72,4 +72,5 @@
     <string name="Map">карта</string>
     <string name="LoyaltyCard">карта лояльности</string>
     <string name="save">Сохранить</string>
+    <string name="Outdoor">Закрыть</string>
 </resources>

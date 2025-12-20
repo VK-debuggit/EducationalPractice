@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -55,12 +56,24 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.gson)
 
+    implementation(platform("io.github.jan-tennert.supabase:bom:2.2.3"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-okhttp:2.3.12")
+
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("io.ktor:ktor-client-serialization:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+
+    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-okhttp:2.3.7")
+    implementation("io.ktor:ktor-client-logging:2.3.7")
     
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.2.3")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.2.3")
@@ -78,6 +91,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.identity.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

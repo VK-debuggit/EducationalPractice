@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf("")
+    var saveSuccess by mutableStateOf(false) // Добавим состояние успешного сохранения
 
     var name by mutableStateOf("")
     var lastName by mutableStateOf("")
@@ -21,20 +22,28 @@ class ProfileViewModel : ViewModel() {
     var phone by mutableStateOf("")
     var photoUri by mutableStateOf<Uri?>(null)
 
+    // Добавляем поле для хранения userId
+    var userId by mutableStateOf("")
+
     private val profileRepository = ProfileRepository()
 
     fun loadProfile(context: Context) {
-        val userId = getUserIdFromSharedPreferences(context)
-        if (userId.isNullOrEmpty()) {
+        val currentUserId = getUserIdFromSharedPreferences(context)
+        if (currentUserId.isNullOrEmpty()) {
             errorMessage = "Пользователь не найден"
             return
         }
 
+        userId = currentUserId // Сохраняем userId в ViewModel
         isLoading = true
+        errorMessage = ""
+        saveSuccess = false
+
         viewModelScope.launch {
             try {
                 Log.d("ProfileViewModel", "Загрузка профиля для user_id: $userId")
                 val profile = profileRepository.getProfile(userId)
+
 
                 if (profile != null) {
                     name = profile.firstname ?: ""
@@ -42,9 +51,9 @@ class ProfileViewModel : ViewModel() {
                     address = profile.address ?: ""
                     phone = profile.phone ?: ""
                     Log.d("ProfileViewModel", "Профиль загружен: name='$name', lastname='$lastName'")
+
                 } else {
                     Log.d("ProfileViewModel", "Профиль не найден, оставляем поля пустыми")
-                    // Не сбрасываем поля, чтобы пользователь видел текущие значения
                 }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Ошибка загрузки профиля", e)
@@ -56,14 +65,14 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun saveProfile(context: Context): Boolean {
-        val userId = getUserIdFromSharedPreferences(context)
-        if (userId.isNullOrEmpty()) {
-            errorMessage = "Пользователь не найден"
+        if (userId.isEmpty()) {
+            errorMessage = "Ошибка: userId не найден"
             return false
         }
 
         isLoading = true
-        var success = false
+        errorMessage = ""
+        saveSuccess = false
 
         viewModelScope.launch {
             try {
@@ -73,45 +82,46 @@ class ProfileViewModel : ViewModel() {
                 // Сначала проверяем, есть ли профиль
                 val existingProfile = profileRepository.getProfile(userId)
 
-                if (existingProfile == null) {
+                val success = if (existingProfile == null) {
                     // Профиля нет - создаем новый
-                    success = profileRepository.createProfile(
+                    profileRepository.createProfile(
                         userId = userId,
                         firstname = name,
                         lastname = lastName,
                         address = address,
                         phone = phone
                     )
-                    Log.d("ProfileViewModel", "Создан новый профиль: $success")
                 } else {
                     // Профиль есть - обновляем существующий
-                    success = profileRepository.updateProfile(
+                    profileRepository.updateProfile(
                         userId = userId,
                         firstname = name,
                         lastname = lastName,
                         address = address,
                         phone = phone
                     )
-                    Log.d("ProfileViewModel", "Обновлен существующий профиль: $success")
                 }
 
-                if (!success) {
-                    errorMessage = "Не удалось сохранить профиль"
-                } else {
+                if (success) {
+                    saveSuccess = true
                     errorMessage = "" // Очищаем ошибку при успехе
+                    Log.d("ProfileViewModel", "✅ Профиль успешно сохранен")
+
                     // Перезагружаем профиль после сохранения
                     loadProfile(context)
+                } else {
+                    errorMessage = "Не удалось сохранить профиль"
+                    Log.e("ProfileViewModel", "❌ Не удалось сохранить профиль")
                 }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Ошибка сохранения профиля", e)
                 errorMessage = "Ошибка сохранения: ${e.message}"
-                success = false
             } finally {
                 isLoading = false
             }
         }
 
-        return success
+        return saveSuccess
     }
 
     fun getFullName(): String {
@@ -123,8 +133,14 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    private fun getUserIdFromSharedPreferences(context: Context): String? {
+    // Делаем метод публичным для использования в других экранах
+    fun getUserIdFromSharedPreferences(context: Context): String? {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         return prefs.getString("user_id", null)
+    }
+
+    // Добавляем метод для получения userId (если нужно из других экранов)
+    fun getCurrentUserId(): String {
+        return userId
     }
 }
