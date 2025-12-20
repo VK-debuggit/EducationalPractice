@@ -179,15 +179,17 @@ fun SignIn() {
 
         Spacer(Modifier.weight(0.05f))
 
-        // Забыли пароль?
         Text(
             text = stringResource(R.string.Recovery),
-            style = MaterialTheme.typography.bodySmall.copy( // Body Regular 16
+            style = MaterialTheme.typography.bodySmall.copy(
                 color = Accent,
                 textDecoration = TextDecoration.Underline
             ),
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable {
+                    NavigationManager.navigateTo(Views.Home.route)
+                }
                 .padding(vertical = 8.dp),
             textAlign = TextAlign.End
         )

@@ -104,7 +104,7 @@ fun Catalog(
     LaunchedEffect(userIdState.value) {
         if (userIdState.value.isNotEmpty()) {
             try {
-                val favorites = favoriteRepository.getFavoritesForUser(userIdState.value) // Используем .value
+                val favorites = favoriteRepository.getFavoritesForUser(userIdState.value)
                 favoriteProductIds.value = favorites.map { it.product_id }.toSet()
                 Log.d("Catalog", "Загружено избранных: ${favoriteProductIds.value.size}")
             } catch (e: Exception) {
@@ -118,7 +118,7 @@ fun Catalog(
         loadProducts("Все", null, products, isLoading, errorMessage)
     }
 
-    // Функция для переключения избранного - исправлено
+    // Функция для переключения избранного
     val onFavoriteToggle: (String, Boolean) -> Unit = { productId, isFavorite ->
         coroutineScope.launch {
             try {

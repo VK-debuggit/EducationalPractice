@@ -200,7 +200,6 @@ fun ProfileFormScreen() {
                         R.drawable.bag_2 -> {}
                         R.drawable.orders -> {}
                         R.drawable.profile -> {
-                            NavigationManager.navigateTo(Views.Profile.route)
                         }
                     }
                 }
